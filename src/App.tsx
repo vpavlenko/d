@@ -196,12 +196,22 @@ const RenderedNotes = ({
   pitchToY,
   playingNotes,
   onNoteClick,
+  isEditMode,
+  playNote,
+  onNoteDelete,
+  hoveredNoteIndex,
+  onNoteHover,
 }: {
   score: Score;
   secondToX: (second: number) => number;
   pitchToY: (pitch: number) => number;
   playingNotes: Set<number>;
   onNoteClick?: (index: number) => void;
+  isEditMode?: boolean;
+  playNote?: (pitch: number) => void;
+  onNoteDelete?: (index: number) => void;
+  hoveredNoteIndex?: number | null;
+  onNoteHover?: (index: number | null) => void;
 }) => {
   return (
     <>
@@ -220,8 +230,29 @@ const RenderedNotes = ({
 
         const isAdding = note.state === "adding";
         const borderRadius = isAdding ? "10px 0 0 10px" : "10px";
-        const border = isAdding ? "2px dotted #000" : "none";
-        const borderRight = isAdding ? "2px dotted #000" : "none";
+        // Use same color logic for borders as text
+        const borderColor = BRIGHT_SCALE_DEGREES.includes(scaleDegree)
+          ? "#000000"
+          : "#ffffff";
+        const border = isAdding ? `2px dotted ${borderColor}` : "none";
+        const borderRight = isAdding ? `2px dotted ${borderColor}` : "none";
+
+        // Determine cursor based on edit mode and note state
+        let cursor = "default";
+        if (isAdding && onNoteClick) {
+          cursor = "pointer";
+        } else if (isEditMode && !isAdding) {
+          // Use same color logic for cursor as text
+          const cursorSvg = BRIGHT_SCALE_DEGREES.includes(scaleDegree)
+            ? "PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE4IDZMNiAxOCIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNNiA2TDE4IDE4IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=" // Black X for bright backgrounds
+            : "PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE4IDZMNiAxOCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNNiA2TDE4IDE4IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo="; // White X for dark backgrounds
+          cursor = `url('data:image/svg+xml;base64,${cursorSvg}') 8 8, auto`;
+        }
+
+        // Apply scale transform when hovering over existing note in edit mode
+        const isHoveredForDelete =
+          isEditMode && !isAdding && hoveredNoteIndex === index;
+        const transform = isHoveredForDelete ? "scale(0.9)" : "none";
 
         return (
           <div
@@ -232,28 +263,54 @@ const RenderedNotes = ({
               top: `${pitchToY(note.pitch)}px`,
               width: `${secondToX(note.end) - secondToX(note.start)}px`,
               height: `${NOTE_HEIGHT}px`,
-              backgroundColor: color,
-              borderRadius,
-              border: isAdding ? border : "none",
-              borderRight: isAdding ? borderRight : "none",
               zIndex: 4,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: textColor,
-              fontSize: "12px",
-              fontWeight: "bold",
-              fontFamily: "monospace",
-              boxShadow: haloEffect,
-              transition: "box-shadow 0.1s ease-in-out",
-              cursor: isAdding && onNoteClick ? "pointer" : "default",
+              cursor,
               pointerEvents: isAdding ? "none" : "auto",
             }}
-            onClick={() => isAdding && onNoteClick?.(index)}
+            onClick={() => {
+              if (isAdding) {
+                onNoteClick?.(index);
+              } else if (isEditMode && !isAdding) {
+                onNoteDelete?.(index);
+              }
+            }}
+            onMouseEnter={() => {
+              if (isEditMode && !isAdding && playNote) {
+                playNote(note.pitch);
+                onNoteHover?.(index);
+              }
+            }}
+            onMouseLeave={() => {
+              if (isEditMode && !isAdding) {
+                onNoteHover?.(null);
+              }
+            }}
           >
-            <span style={{ pointerEvents: "none", userSelect: "none" }}>
-              {scaleDegree}
-            </span>
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundColor: color,
+                borderRadius,
+                border: isAdding ? border : "none",
+                borderRight: isAdding ? borderRight : "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: textColor,
+                fontSize: "12px",
+                fontWeight: "bold",
+                fontFamily: "monospace",
+                boxShadow: haloEffect,
+                transition:
+                  "box-shadow 0.1s ease-in-out, transform 0.1s ease-in-out",
+                transform,
+              }}
+            >
+              <span style={{ pointerEvents: "none", userSelect: "none" }}>
+                {scaleDegree}
+              </span>
+            </div>
           </div>
         );
       })}
@@ -321,6 +378,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   const [lastHoverPitch, setLastHoverPitch] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragNote, setDragNote] = useState<Note | null>(null);
+  const [hoveredNoteIndex, setHoveredNoteIndex] = useState<number | null>(null);
 
   // Reset hover state when edit mode is disabled
   useEffect(() => {
@@ -329,6 +387,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
       setLastHoverPitch(null);
       setIsDragging(false);
       setDragNote(null);
+      setHoveredNoteIndex(null);
     }
   }, [isEditMode]);
 
@@ -447,6 +506,15 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
         };
         setScore({ ...score, notes: newNotes });
       }
+    },
+    [score]
+  );
+
+  const handleNoteDelete = useCallback(
+    (index: number) => {
+      // Remove the note from the score
+      const newNotes = score.notes.filter((_, i) => i !== index);
+      setScore({ ...score, notes: newNotes });
     },
     [score]
   );
@@ -686,6 +754,11 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
           pitchToY={pitchToY}
           playingNotes={playingNotes}
           onNoteClick={handleNoteClick}
+          isEditMode={isEditMode}
+          playNote={playNote}
+          onNoteDelete={handleNoteDelete}
+          hoveredNoteIndex={hoveredNoteIndex}
+          onNoteHover={setHoveredNoteIndex}
         />
       </D>
     </div>
