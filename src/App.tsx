@@ -155,6 +155,8 @@ const MeasuresGrid = ({
             fontWeight: "bold",
             zIndex: 3,
             fontFamily: "sans-serif",
+            pointerEvents: "none",
+            userSelect: "none",
           }}
         >
           {measure}
@@ -217,7 +219,7 @@ const RenderedNotes = ({
           : "none";
 
         const isAdding = note.state === "adding";
-        const borderRadius = isAdding ? "3px 0 0 3px" : "3px";
+        const borderRadius = isAdding ? "10px 0 0 10px" : "10px";
         const border = isAdding ? "2px dotted #000" : "none";
         const borderRight = isAdding ? "2px dotted #000" : "none";
 
@@ -249,7 +251,9 @@ const RenderedNotes = ({
             }}
             onClick={() => isAdding && onNoteClick?.(index)}
           >
-            {scaleDegree}
+            <span style={{ pointerEvents: "none", userSelect: "none" }}>
+              {scaleDegree}
+            </span>
           </div>
         );
       })}
@@ -315,12 +319,16 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   const [score, setScore] = useState(initialScore);
   const [hoverNote, setHoverNote] = useState<Note | null>(null);
   const [lastHoverPitch, setLastHoverPitch] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragNote, setDragNote] = useState<Note | null>(null);
 
   // Reset hover state when edit mode is disabled
   useEffect(() => {
     if (!isEditMode) {
       setHoverNote(null);
       setLastHoverPitch(null);
+      setIsDragging(false);
+      setDragNote(null);
     }
   }, [isEditMode]);
 
@@ -383,6 +391,47 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
       return closestPitch;
     },
     [score.notes]
+  );
+
+  // Fine-grained quantization for 16th notes during resize
+  const quantizeXFine = useCallback(
+    (x: number, measures: number[], beats: number[]) => {
+      // Create union of measures and beats, then add 3 additional values between each adjacent pair
+      const baseTimePoints = [...measures, ...beats].sort((a, b) => a - b);
+      const fineTimePoints: number[] = [];
+
+      for (let i = 0; i < baseTimePoints.length - 1; i++) {
+        const start = baseTimePoints[i];
+        const end = baseTimePoints[i + 1];
+        const segment = (end - start) / 4; // Divide each segment into 4 parts for 16th notes
+
+        fineTimePoints.push(start);
+        fineTimePoints.push(start + segment);
+        fineTimePoints.push(start + 2 * segment);
+        fineTimePoints.push(start + 3 * segment);
+      }
+      // Add the last time point
+      if (baseTimePoints.length > 0) {
+        fineTimePoints.push(baseTimePoints[baseTimePoints.length - 1]);
+      }
+
+      const second = x / PX_PER_SECOND;
+
+      // Find the closest time point >= second for end position
+      let closestTime = fineTimePoints[0];
+      let minDistance = Math.abs(closestTime - second);
+
+      for (const timePoint of fineTimePoints) {
+        const distance = Math.abs(timePoint - second);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestTime = timePoint;
+        }
+      }
+
+      return closestTime;
+    },
+    []
   );
 
   const handleNoteClick = useCallback(
@@ -524,9 +573,9 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
               width: `${gridWidth}px`,
               height: `${gridHeight}px`,
               zIndex: 3,
-              cursor: "crosshair",
+              cursor: isDragging ? "ew-resize" : "crosshair",
             }}
-            onMouseMove={(e) => {
+            onMouseDown={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               const x = e.clientX - rect.left;
               const y = e.clientY - rect.top;
@@ -534,47 +583,89 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
               const { start, end } = quantizeX(x, measures, beats);
               const pitch = quantizeY(y, pitchToY);
 
-              // Only update if the note properties have actually changed
-              if (
-                !hoverNote ||
-                hoverNote.start !== start ||
-                hoverNote.end !== end ||
-                hoverNote.pitch !== pitch
-              ) {
-                // Play note sound if pitch changed
-                if (lastHoverPitch !== pitch) {
-                  playNote(pitch);
-                }
+              // Play note sound when starting drag
+              playNote(pitch);
 
-                const newHoverNote: Note = {
-                  start,
-                  end,
-                  pitch,
-                  state: "adding",
+              // Start dragging - create initial note with fixed pitch and start
+              const initialNote: Note = {
+                start,
+                end,
+                pitch,
+                state: "adding",
+              };
+
+              setIsDragging(true);
+              setDragNote(initialNote);
+              setHoverNote(null);
+              setLastHoverPitch(pitch);
+            }}
+            onMouseMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+
+              if (isDragging && dragNote) {
+                // During drag: only update end position with fine quantization
+                const newEnd = quantizeXFine(x, measures, beats);
+
+                // Ensure end is not before start
+                const finalEnd = Math.max(newEnd, dragNote.start + 0.0625); // Minimum 16th note length
+
+                const updatedDragNote: Note = {
+                  ...dragNote,
+                  end: finalEnd,
                 };
-                setHoverNote(newHoverNote);
-                setLastHoverPitch(pitch);
+                setDragNote(updatedDragNote);
+              } else {
+                // Normal hover behavior when not dragging
+                const { start, end } = quantizeX(x, measures, beats);
+                const pitch = quantizeY(y, pitchToY);
+
+                // Only update if the note properties have actually changed
+                if (
+                  !hoverNote ||
+                  hoverNote.start !== start ||
+                  hoverNote.end !== end ||
+                  hoverNote.pitch !== pitch
+                ) {
+                  // Play note sound if pitch changed
+                  if (lastHoverPitch !== pitch) {
+                    playNote(pitch);
+                  }
+
+                  const newHoverNote: Note = {
+                    start,
+                    end,
+                    pitch,
+                    state: "adding",
+                  };
+                  setHoverNote(newHoverNote);
+                  setLastHoverPitch(pitch);
+                }
               }
             }}
-            onMouseLeave={() => {
-              setHoverNote(null);
-              setLastHoverPitch(null);
-            }}
-            onClick={() => {
-              if (hoverNote) {
-                // Play note sound when adding to score
-                playNote(hoverNote.pitch);
-
-                // Add the hover note permanently to the score
+            onMouseUp={() => {
+              if (isDragging && dragNote) {
+                // Finalize the note - add it to the score
                 const newNotes = [
                   ...score.notes,
                   {
-                    start: hoverNote.start,
-                    end: hoverNote.end,
-                    pitch: hoverNote.pitch,
+                    start: dragNote.start,
+                    end: dragNote.end,
+                    pitch: dragNote.pitch,
                   },
                 ];
                 setScore({ ...score, notes: newNotes });
+
+                // Reset drag state
+                setIsDragging(false);
+                setDragNote(null);
+                setHoverNote(null);
+                setLastHoverPitch(null);
+              }
+            }}
+            onMouseLeave={() => {
+              if (!isDragging) {
                 setHoverNote(null);
                 setLastHoverPitch(null);
               }
@@ -585,7 +676,11 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
         <RenderedNotes
           score={{
             ...score,
-            notes: hoverNote ? [...score.notes, hoverNote] : score.notes,
+            notes: dragNote
+              ? [...score.notes, dragNote]
+              : hoverNote
+              ? [...score.notes, hoverNote]
+              : score.notes,
           }}
           secondToX={secondToX}
           pitchToY={pitchToY}
