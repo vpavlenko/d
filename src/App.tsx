@@ -55,15 +55,60 @@ const notes: Note[] = [
 
 const score: Score = { notes, tonic: 0 };
 
-const OctaveGrid = () => {
-  const lowestPitch = Math.min(...notes.map((note) => note.pitch));
-  const highestPitch = Math.max(...notes.map((note) => note.pitch));
-  const octaves = highestPitch - lowestPitch;
-  const octaveGrid = Array.from({ length: octaves }, (_, index) => {
-    const pitch = lowestPitch + index * 12;
-    return <div key={pitch}>{pitch}</div>;
-  });
-  return <div>{octaveGrid}</div>;
+const OctaveGrid = ({
+  score,
+  pitchToY,
+  gridWidth,
+}: {
+  score: Score;
+  pitchToY: (pitch: number) => number;
+  gridWidth: number;
+}) => {
+  const minPitch = Math.min(...score.notes.map((note) => note.pitch));
+  const maxPitch = Math.max(...score.notes.map((note) => note.pitch));
+
+  const octaveLines = [];
+
+  for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
+    const pitchClass = ((pitch % 12) + 12) % 12;
+    const tonic = score.tonic;
+
+    if (pitchClass === tonic) {
+      octaveLines.push(
+        <div
+          key={`tonic-${pitch}`}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: `${pitchToY(pitch) + NOTE_HEIGHT}px`, // Bottom of the pitch
+            width: `${gridWidth}px`,
+            height: 0,
+            borderTop: "0.5px solid #999",
+            zIndex: 1,
+          }}
+        />
+      );
+    }
+
+    if (pitchClass === (tonic - 5 + 12) % 12) {
+      octaveLines.push(
+        <div
+          key={`dashed-${pitch}`}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: `${pitchToY(pitch) + NOTE_HEIGHT}px`, // Bottom of the pitch
+            width: `${gridWidth}px`,
+            height: 0,
+            borderTop: "0.5px dashed #666",
+            zIndex: 1,
+          }}
+        />
+      );
+    }
+  }
+
+  return <>{octaveLines}</>;
 };
 
 const MeasuresGrid = ({
@@ -344,15 +389,21 @@ const Grid = ({
   beats,
   secondToX,
   gridHeight,
+  gridWidth,
+  score,
+  pitchToY,
 }: {
   measures: number[];
   beats: number[];
   secondToX: (second: number) => number;
   gridHeight: number;
+  gridWidth: number;
+  score: Score;
+  pitchToY: (pitch: number) => number;
 }) => {
   return (
     <>
-      <OctaveGrid />
+      <OctaveGrid score={score} pitchToY={pitchToY} gridWidth={gridWidth} />
       <MeasuresGrid
         measures={measures}
         beats={beats}
@@ -461,6 +512,9 @@ const NoteEditor = ({ score }: { score: Score }) => {
           beats={beats}
           secondToX={secondToX}
           gridHeight={gridHeight}
+          gridWidth={gridWidth}
+          score={score}
+          pitchToY={pitchToY}
         />
         <RenderedNotes
           score={score}
