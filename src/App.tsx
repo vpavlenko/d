@@ -542,7 +542,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
                 hoverNote.pitch !== pitch
               ) {
                 // Play note sound if pitch changed
-                if (lastHoverPitch !== null && lastHoverPitch !== pitch) {
+                if (lastHoverPitch !== pitch) {
                   playNote(pitch);
                 }
 
