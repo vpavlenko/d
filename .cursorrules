@@ -1,0 +1,21 @@
+# D Project Coding Rules
+
+## UI Design Rules
+
+1. **Grayscale UI**: Nothing besides the notes themselves should ever use colors. Everything except notes must be grayscale only.
+
+   - Buttons, text, backgrounds, grids, etc. should all be grayscale (#fff, #ccc, #999, #333, #000, etc.)
+   - Only the musical notes can have colors (they use the COLORS array for scale degree visualization)
+
+2. **Minimal Icon Buttons**: For play/pause and similar controls:
+   - Use just the icon with no background
+   - No heavy outlines or text labels
+   - Everyone understands standard icons (play, pause, stop, etc.)
+   - Grayscale colors only (#ccc normal, #fff on hover)
+
+## Development Workflow Rules
+
+1. **No Dev Server Suggestions**: Never suggest running `npm dev` or similar dev commands after implementing features
+   - The user runs the dev server continuously
+   - They will check features themselves and report any errors
+   - Only mention if there are actual linting errors detected

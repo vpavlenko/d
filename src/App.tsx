@@ -436,30 +436,22 @@ const NoteEditor = ({ score }: { score: Score }) => {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "8px",
-            padding: "8px 16px",
-            backgroundColor: isPlaying ? "#dc2626" : "#16a34a",
-            color: "white",
+            justifyContent: "center",
+            padding: "8px",
+            backgroundColor: "transparent",
+            color: "#ccc",
             border: "none",
-            borderRadius: "6px",
             cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "500",
-            transition: "background-color 0.2s ease",
+            transition: "color 0.2s ease",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = isPlaying
-              ? "#b91c1c"
-              : "#15803d";
+            e.currentTarget.style.color = "#fff";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = isPlaying
-              ? "#dc2626"
-              : "#16a34a";
+            e.currentTarget.style.color = "#ccc";
           }}
         >
-          {isPlaying ? <Square size={16} /> : <Play size={16} />}
-          {isPlaying ? "Stop" : "Play"}
+          {isPlaying ? <Square size={20} /> : <Play size={20} />}
         </button>
       </div>
 
