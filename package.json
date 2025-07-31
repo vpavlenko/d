@@ -11,8 +11,10 @@
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
+    "lucide-react": "^0.535.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tone": "14.7.77"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

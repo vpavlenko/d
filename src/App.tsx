@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState, useRef, useCallback, useEffect } from "react";
+import * as Tone from "tone";
+import { Play, Square } from "lucide-react";
 
 const COLORS = [
   "#ffffff",
@@ -155,14 +157,141 @@ const getScaleDegree = (pitch: number, tonic: number): string => {
 
 const BRIGHT_SCALE_DEGREES = ["1", "2", "3", "♯4", "6", "7"];
 
+// Custom hook for playback functionality
+const usePlayback = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingNotes, setPlayingNotes] = useState<Set<number>>(new Set());
+  const synthRef = useRef<Tone.PolySynth | null>(null);
+  const scheduledEventsRef = useRef<number[]>([]);
+
+  // Initialize synth on first use
+  const initializeSynth = useCallback(async () => {
+    if (!synthRef.current) {
+      await Tone.start();
+      // Create a piano-like synth using PolySynth with a nice piano-ish sound
+      const synth = new Tone.PolySynth(Tone.Synth, {
+        oscillator: {
+          type: "triangle",
+        },
+        envelope: {
+          attack: 0.02,
+          decay: 0.1,
+          sustain: 0.3,
+          release: 1,
+        },
+      }).toDestination();
+
+      synthRef.current = synth;
+    }
+    return synthRef.current;
+  }, []);
+
+  const play = useCallback(
+    async (score: Score) => {
+      try {
+        const synth = await initializeSynth();
+
+        // Clear any existing scheduled events
+        scheduledEventsRef.current.forEach((id) => Tone.Transport.clear(id));
+        scheduledEventsRef.current = [];
+
+        // Reset transport
+        Tone.Transport.stop();
+        Tone.Transport.position = 0;
+
+        setIsPlaying(true);
+        setPlayingNotes(new Set());
+
+        // Schedule all notes using Transport.schedule for precise timing
+        score.notes.forEach((note, noteIndex) => {
+          // Schedule note start
+          const startEventId = Tone.Transport.schedule((time) => {
+            // Convert MIDI number to note name
+            const noteName = Tone.Frequency(note.pitch, "midi").toNote();
+            const duration = note.end - note.start;
+
+            // Trigger note with duration
+            synth.triggerAttackRelease(noteName, duration, time, 0.8);
+
+            // Update UI to show this note is playing
+            setPlayingNotes((prev) => new Set([...prev, noteIndex]));
+          }, `${note.start}`);
+
+          // Schedule note end (for UI only, audio handled by triggerAttackRelease)
+          const endEventId = Tone.Transport.schedule(() => {
+            // Update UI to remove this note from playing
+            setPlayingNotes((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(noteIndex);
+              return newSet;
+            });
+          }, `${note.end}`);
+
+          scheduledEventsRef.current.push(startEventId, endEventId);
+        });
+
+        // Schedule transport stop at the end
+        const maxEndTime = Math.max(...score.notes.map((note) => note.end));
+        const stopEventId = Tone.Transport.schedule(() => {
+          setIsPlaying(false);
+          setPlayingNotes(new Set());
+        }, `${maxEndTime + 0.1}`); // Small buffer to ensure all notes finish
+
+        scheduledEventsRef.current.push(stopEventId);
+
+        // Start transport
+        Tone.Transport.start();
+      } catch (error) {
+        console.error("Error playing score:", error);
+        setIsPlaying(false);
+        setPlayingNotes(new Set());
+      }
+    },
+    [initializeSynth]
+  );
+
+  const stop = useCallback(() => {
+    // Clear all scheduled events
+    scheduledEventsRef.current.forEach((id) => Tone.Transport.clear(id));
+    scheduledEventsRef.current = [];
+
+    // Stop transport
+    Tone.Transport.stop();
+    Tone.Transport.position = 0;
+
+    // Reset state
+    setIsPlaying(false);
+    setPlayingNotes(new Set());
+
+    // Stop all synth notes
+    if (synthRef.current) {
+      synthRef.current.releaseAll();
+    }
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stop();
+      if (synthRef.current) {
+        synthRef.current.dispose();
+      }
+    };
+  }, [stop]);
+
+  return { isPlaying, playingNotes, play, stop };
+};
+
 const RenderedNotes = ({
   score,
   secondToX,
   pitchToY,
+  playingNotes,
 }: {
   score: Score;
   secondToX: (second: number) => number;
   pitchToY: (pitch: number) => number;
+  playingNotes: Set<number>;
 }) => {
   return (
     <>
@@ -173,6 +302,11 @@ const RenderedNotes = ({
         const textColor = BRIGHT_SCALE_DEGREES.includes(scaleDegree)
           ? "#000000"
           : "#ffffff";
+
+        const isPlaying = playingNotes.has(index);
+        const haloEffect = isPlaying
+          ? `0 0 5px ${color}, 0 0 10px ${color}, 0 0 15px ${color}`
+          : "none";
 
         return (
           <div
@@ -193,6 +327,8 @@ const RenderedNotes = ({
               fontSize: "12px",
               fontWeight: "bold",
               fontFamily: "monospace",
+              boxShadow: haloEffect,
+              transition: "box-shadow 0.1s ease-in-out",
             }}
           >
             {scaleDegree}
@@ -250,6 +386,8 @@ const D = ({
 };
 
 const NoteEditor = ({ score }: { score: Score }) => {
+  const { isPlaying, playingNotes, play, stop } = usePlayback();
+
   const { measures, beats, gridHeight, gridWidth, secondToX, pitchToY } =
     useMemo(() => {
       const highestNoteEnd = Math.max(...score.notes.map((note) => note.end));
@@ -290,15 +428,56 @@ const NoteEditor = ({ score }: { score: Score }) => {
     }, [score]);
 
   return (
-    <D gridWidth={gridWidth} gridHeight={gridHeight}>
-      <Grid
-        measures={measures}
-        beats={beats}
-        secondToX={secondToX}
-        gridHeight={gridHeight}
-      />
-      <RenderedNotes score={score} secondToX={secondToX} pitchToY={pitchToY} />
-    </D>
+    <div>
+      {/* Play button */}
+      <div style={{ marginBottom: "10px" }}>
+        <button
+          onClick={() => (isPlaying ? stop() : play(score))}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "8px 16px",
+            backgroundColor: isPlaying ? "#dc2626" : "#16a34a",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "500",
+            transition: "background-color 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = isPlaying
+              ? "#b91c1c"
+              : "#15803d";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = isPlaying
+              ? "#dc2626"
+              : "#16a34a";
+          }}
+        >
+          {isPlaying ? <Square size={16} /> : <Play size={16} />}
+          {isPlaying ? "Stop" : "Play"}
+        </button>
+      </div>
+
+      <D gridWidth={gridWidth} gridHeight={gridHeight}>
+        <Grid
+          measures={measures}
+          beats={beats}
+          secondToX={secondToX}
+          gridHeight={gridHeight}
+        />
+        <RenderedNotes
+          score={score}
+          secondToX={secondToX}
+          pitchToY={pitchToY}
+          playingNotes={playingNotes}
+        />
+      </D>
+    </div>
   );
 };
 
