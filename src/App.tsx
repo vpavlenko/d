@@ -186,28 +186,6 @@ const RenderedNotes = ({
   );
 };
 
-const D = ({
-  gridWidth,
-  gridHeight,
-  children,
-}: {
-  gridWidth: number;
-  gridHeight: number;
-  children: React.ReactNode;
-}) => {
-  return (
-    <div
-      style={{
-        width: `${gridWidth}px`,
-        height: `${gridHeight}px`,
-        position: "relative",
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
 const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   const { isPlaying, playingNotes, play, stop, playNote } = usePlayback();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -472,7 +450,13 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
         </button>
       </div>
 
-      <D gridWidth={gridWidth} gridHeight={gridHeight}>
+      <div
+        style={{
+          width: `${gridWidth}px`,
+          height: `${gridHeight}px`,
+          position: "relative",
+        }}
+      >
         <Grid
           measures={measures}
           beats={beats}
@@ -604,7 +588,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
           hoveredNoteIndex={hoveredNoteIndex}
           onNoteHover={setHoveredNoteIndex}
         />
-      </D>
+      </div>
     </div>
   );
 };
@@ -618,7 +602,6 @@ function App() {
         padding: "10px",
         minHeight: "100vh",
         fontFamily: "Arial, sans-serif",
-        backgroundColor: "#0a0a0a", // Dark background instead of white
       }}
     >
       {/* Left column - NoteEditor */}
