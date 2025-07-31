@@ -66,6 +66,11 @@ const getScaleDegree = (pitch: number, tonic: number): string => {
 
 const BRIGHT_SCALE_DEGREES = ["1", "2", "3", "♯4", "6", "7"];
 
+// Generate a stable key for a note based on its musical properties
+const generateNoteKey = (note: Note): string => {
+  return `${note.pitch}_${note.start}_${note.end}`;
+};
+
 const RenderedNotes = ({
   score,
   secondToX,
@@ -132,7 +137,7 @@ const RenderedNotes = ({
 
         return (
           <div
-            key={index}
+            key={generateNoteKey(note)}
             style={{
               position: "absolute",
               left: `${secondToX(note.start)}px`,
@@ -364,6 +369,9 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
       // Remove the note from the score
       const newNotes = score.notes.filter((_, i) => i !== index);
       setScore({ ...score, notes: newNotes });
+
+      // Reset hover state to prevent stale index references
+      setHoveredNoteIndex(null);
     },
     [score]
   );
