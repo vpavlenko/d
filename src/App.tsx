@@ -45,14 +45,15 @@ const OctaveGrid = ({
   score,
   pitchToY,
   gridWidth,
+  minPitch,
+  maxPitch,
 }: {
   score: Score;
   pitchToY: (pitch: number) => number;
   gridWidth: number;
+  minPitch: number;
+  maxPitch: number;
 }) => {
-  const minPitch = Math.min(...score.notes.map((note) => note.pitch));
-  const maxPitch = Math.max(...score.notes.map((note) => note.pitch));
-
   const octaveLines = [];
 
   for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
@@ -326,6 +327,8 @@ const Grid = ({
   gridWidth,
   score,
   pitchToY,
+  minPitch,
+  maxPitch,
 }: {
   measures: number[];
   beats: number[];
@@ -334,10 +337,18 @@ const Grid = ({
   gridWidth: number;
   score: Score;
   pitchToY: (pitch: number) => number;
+  minPitch: number;
+  maxPitch: number;
 }) => {
   return (
     <>
-      <OctaveGrid score={score} pitchToY={pitchToY} gridWidth={gridWidth} />
+      <OctaveGrid
+        score={score}
+        pitchToY={pitchToY}
+        gridWidth={gridWidth}
+        minPitch={minPitch}
+        maxPitch={maxPitch}
+      />
       <MeasuresGrid
         measures={measures}
         beats={beats}
@@ -421,10 +432,13 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   );
 
   const quantizeY = useCallback(
-    (y: number, pitchToY: (pitch: number) => number) => {
+    (
+      y: number,
+      pitchToY: (pitch: number) => number,
+      minPitch: number,
+      maxPitch: number
+    ) => {
       // Find pitch where pitchToY(pitch) >= y and pitchToY(pitch-1) < y
-      const minPitch = Math.min(...score.notes.map((note) => note.pitch));
-      const maxPitch = Math.max(...score.notes.map((note) => note.pitch));
 
       for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
         const pitchY = pitchToY(pitch);
@@ -449,7 +463,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
 
       return closestPitch;
     },
-    [score.notes]
+    []
   );
 
   // Fine-grained quantization for 16th notes during resize
@@ -519,44 +533,61 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
     [score]
   );
 
-  const { measures, beats, gridHeight, gridWidth, secondToX, pitchToY } =
-    useMemo(() => {
-      const highestNoteEnd = Math.max(...score.notes.map((note) => note.end));
+  const {
+    measures,
+    beats,
+    gridHeight,
+    gridWidth,
+    secondToX,
+    pitchToY,
+    minPitch,
+    maxPitch,
+  } = useMemo(() => {
+    const highestNoteEnd = 5; // Math.max(...score.notes.map((note) => note.end));
 
-      // Fix: Use the VERY LAST measure (ceiling of highest note end)
-      const lastMeasure = Math.ceil(highestNoteEnd);
-      const measures = Array.from(
-        { length: lastMeasure + 1 },
-        (_, index) => index
-      );
-      const allBeats = Array.from(
-        { length: lastMeasure * 4 },
-        (_, index) => index / 4
-      );
+    // Fix: Use the VERY LAST measure (ceiling of highest note end)
+    const lastMeasure = Math.ceil(highestNoteEnd);
+    const measures = Array.from(
+      { length: lastMeasure + 1 },
+      (_, index) => index
+    );
+    const allBeats = Array.from(
+      { length: lastMeasure * 4 },
+      (_, index) => index / 4
+    );
 
-      // Strip measures from beats via Set operations
-      const measuresSet = new Set(measures);
-      const beats = allBeats
-        .filter((beat) => !measuresSet.has(beat))
-        .sort((a, b) => a - b);
+    // Strip measures from beats via Set operations
+    const measuresSet = new Set(measures);
+    const beats = allBeats
+      .filter((beat) => !measuresSet.has(beat))
+      .sort((a, b) => a - b);
 
-      // Calculate dynamic dimensions
-      const minPitch = Math.min(...score.notes.map((note) => note.pitch));
-      const maxPitch = Math.max(...score.notes.map((note) => note.pitch));
-      const gridHeight =
-        (maxPitch - minPitch) * PITCH_DISTANCE + NOTE_HEIGHT + HEADER_HEIGHT;
-      const gridWidth = lastMeasure * PX_PER_SECOND; // Use lastMeasure instead of highestNoteEnd
+    // Calculate dynamic dimensions
+    const minPitch = 36 + score.tonic; // Math.min(...score.notes.map((note) => note.pitch));
+    const maxPitch = 84 + score.tonic; // Math.max(...score.notes.map((note) => note.pitch));
+    const gridHeight =
+      (maxPitch - minPitch) * PITCH_DISTANCE + NOTE_HEIGHT + HEADER_HEIGHT;
+    const gridWidth = lastMeasure * PX_PER_SECOND; // Use lastMeasure instead of highestNoteEnd
 
-      // Create functions
-      const secondToX = (second: number) => second * PX_PER_SECOND;
+    // Create functions
+    const secondToX = (second: number) => second * PX_PER_SECOND;
 
-      // pitchToY: minPitch gets maxY (container height), higher pitches get lower Y values
-      const pitchToY = (pitch: number) => {
-        return HEADER_HEIGHT + (maxPitch - pitch) * PITCH_DISTANCE;
-      };
+    // pitchToY: minPitch gets maxY (container height), higher pitches get lower Y values
+    const pitchToY = (pitch: number) => {
+      return HEADER_HEIGHT + (maxPitch - pitch) * PITCH_DISTANCE;
+    };
 
-      return { measures, beats, gridHeight, gridWidth, secondToX, pitchToY };
-    }, [score]);
+    return {
+      measures,
+      beats,
+      gridHeight,
+      gridWidth,
+      secondToX,
+      pitchToY,
+      minPitch,
+      maxPitch,
+    };
+  }, [score]);
 
   return (
     <div>
@@ -629,6 +660,8 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
           gridWidth={gridWidth}
           score={score}
           pitchToY={pitchToY}
+          minPitch={minPitch}
+          maxPitch={maxPitch}
         />
 
         {/* Hover overlay for edit mode */}
@@ -649,7 +682,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
               const y = e.clientY - rect.top;
 
               const { start, end } = quantizeX(x, measures, beats);
-              const pitch = quantizeY(y, pitchToY);
+              const pitch = quantizeY(y, pitchToY, minPitch, maxPitch);
 
               // Play note sound when starting drag
               playNote(pitch);
@@ -687,7 +720,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
               } else {
                 // Normal hover behavior when not dragging
                 const { start, end } = quantizeX(x, measures, beats);
-                const pitch = quantizeY(y, pitchToY);
+                const pitch = quantizeY(y, pitchToY, minPitch, maxPitch);
 
                 // Only update if the note properties have actually changed
                 if (
