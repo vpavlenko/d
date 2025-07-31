@@ -234,16 +234,17 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
       y: number,
       pitchToY: (pitch: number) => number,
       minPitch: number,
-      maxPitch: number
+      maxPitch: number,
+      tonic: number
     ) => {
-      // Find pitch where pitchToY(pitch) >= y and pitchToY(pitch-1) < y
-
-      for (let pitch = minPitch - 1; pitch < maxPitch; pitch++) {
+      for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
+        if (![0, 2, 4, 5, 7, 9, 11].includes((pitch - tonic + 12) % 12)) {
+          continue;
+        }
         const pitchY = pitchToY(pitch);
-        const prevPitchY = pitchToY(pitch - 1);
 
-        if (pitchY <= y && prevPitchY > y) {
-          return pitch + 1;
+        if (pitchY < y) {
+          return pitch;
         }
       }
 
@@ -393,11 +394,20 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
 
       const start = quantizeXFine(x, measures, beats);
       const end = start + EIGHTH_NOTE_DURATION;
-      const pitch = quantizeY(y, pitchToY, minPitch, maxPitch);
+      const pitch = quantizeY(y, pitchToY, minPitch, maxPitch, score.tonic);
 
       return { start, end, pitch, x, y };
     },
-    [quantizeXFine, measures, beats, quantizeY, pitchToY, minPitch, maxPitch]
+    [
+      quantizeXFine,
+      measures,
+      beats,
+      quantizeY,
+      pitchToY,
+      minPitch,
+      maxPitch,
+      score.tonic,
+    ]
   );
 
   return (
