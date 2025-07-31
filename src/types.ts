@@ -6,6 +6,7 @@ export type Note = {
   start: Second;
   end: Second;
   pitch: MidiNumber;
+  state?: "adding";
 };
 
 export type Score = {

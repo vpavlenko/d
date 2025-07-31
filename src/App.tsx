@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { Play, Square } from "lucide-react";
+import { useMemo, useState, useCallback } from "react";
+import { Play, Square, Edit } from "lucide-react";
 import { usePlayback } from "./usePlayback";
 import type { Note, Score } from "./types";
 
@@ -193,11 +193,13 @@ const RenderedNotes = ({
   secondToX,
   pitchToY,
   playingNotes,
+  onNoteClick,
 }: {
   score: Score;
   secondToX: (second: number) => number;
   pitchToY: (pitch: number) => number;
   playingNotes: Set<number>;
+  onNoteClick?: (index: number) => void;
 }) => {
   return (
     <>
@@ -214,6 +216,11 @@ const RenderedNotes = ({
           ? `0 0 5px ${color}, 0 0 10px ${color}, 0 0 15px ${color}`
           : "none";
 
+        const isAdding = note.state === "adding";
+        const borderRadius = isAdding ? "3px 0 0 3px" : "3px";
+        const border = isAdding ? "2px dotted #000" : "none";
+        const borderRight = isAdding ? "2px dotted #000" : "none";
+
         return (
           <div
             key={index}
@@ -224,7 +231,9 @@ const RenderedNotes = ({
               width: `${secondToX(note.end) - secondToX(note.start)}px`,
               height: `${NOTE_HEIGHT}px`,
               backgroundColor: color,
-              borderRadius: "3px",
+              borderRadius,
+              border: isAdding ? border : "none",
+              borderRight: isAdding ? borderRight : "none",
               zIndex: 4,
               display: "flex",
               alignItems: "center",
@@ -235,7 +244,10 @@ const RenderedNotes = ({
               fontFamily: "monospace",
               boxShadow: haloEffect,
               transition: "box-shadow 0.1s ease-in-out",
+              cursor: isAdding && onNoteClick ? "pointer" : "default",
+              pointerEvents: isAdding ? "none" : "auto",
             }}
+            onClick={() => isAdding && onNoteClick?.(index)}
           >
             {scaleDegree}
           </div>
@@ -297,8 +309,89 @@ const D = ({
   );
 };
 
-const NoteEditor = ({ score }: { score: Score }) => {
+const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   const { isPlaying, playingNotes, play, stop } = usePlayback();
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [score, setScore] = useState(initialScore);
+  const [hoverNote, setHoverNote] = useState<Note | null>(null);
+
+  // Quantization functions
+  const quantizeX = useCallback(
+    (x: number, measures: number[], beats: number[]) => {
+      const allTimePoints = [...measures, ...beats].sort((a, b) => a - b);
+      const second = x / PX_PER_SECOND;
+
+      // Find closest time point <= second for start
+      let start = 0;
+      for (let i = allTimePoints.length - 1; i >= 0; i--) {
+        if (allTimePoints[i] <= second) {
+          start = allTimePoints[i];
+          break;
+        }
+      }
+
+      // Find closest time point > second for end
+      let end = start + 0.25; // Default to quarter note
+      for (let i = 0; i < allTimePoints.length; i++) {
+        if (allTimePoints[i] > second) {
+          end = allTimePoints[i];
+          break;
+        }
+      }
+
+      return { start, end };
+    },
+    []
+  );
+
+  const quantizeY = useCallback(
+    (y: number, pitchToY: (pitch: number) => number) => {
+      // Find pitch where pitchToY(pitch) >= y and pitchToY(pitch-1) < y
+      const minPitch = Math.min(...score.notes.map((note) => note.pitch));
+      const maxPitch = Math.max(...score.notes.map((note) => note.pitch));
+
+      for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
+        const pitchY = pitchToY(pitch);
+        const prevPitchY = pitchToY(pitch - 1);
+
+        if (pitchY <= y && prevPitchY > y) {
+          return pitch;
+        }
+      }
+
+      // Fallback to closest pitch
+      let closestPitch = minPitch;
+      let minDistance = Math.abs(pitchToY(minPitch) - y);
+
+      for (let pitch = minPitch + 1; pitch <= maxPitch; pitch++) {
+        const distance = Math.abs(pitchToY(pitch) - y);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestPitch = pitch;
+        }
+      }
+
+      return closestPitch;
+    },
+    [score.notes]
+  );
+
+  const handleNoteClick = useCallback(
+    (index: number) => {
+      const note = score.notes[index];
+      if (note.state === "adding") {
+        // Add the note permanently by removing the "adding" state
+        const newNotes = [...score.notes];
+        newNotes[index] = {
+          start: note.start,
+          end: note.end,
+          pitch: note.pitch,
+        };
+        setScore({ ...score, notes: newNotes });
+      }
+    },
+    [score]
+  );
 
   const { measures, beats, gridHeight, gridWidth, secondToX, pitchToY } =
     useMemo(() => {
@@ -341,8 +434,8 @@ const NoteEditor = ({ score }: { score: Score }) => {
 
   return (
     <div>
-      {/* Play button */}
-      <div style={{ marginBottom: "10px" }}>
+      {/* Control buttons */}
+      <div style={{ marginBottom: "10px", display: "flex", gap: "8px" }}>
         <button
           onClick={() => (isPlaying ? stop() : play(score))}
           style={{
@@ -365,6 +458,29 @@ const NoteEditor = ({ score }: { score: Score }) => {
         >
           {isPlaying ? <Square size={20} /> : <Play size={20} />}
         </button>
+
+        <button
+          onClick={() => setIsEditMode(!isEditMode)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "8px",
+            backgroundColor: "transparent",
+            color: isEditMode ? "#fff" : "#ccc",
+            border: "none",
+            cursor: "pointer",
+            transition: "color 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#fff";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = isEditMode ? "#fff" : "#ccc";
+          }}
+        >
+          <Edit size={20} />
+        </button>
       </div>
 
       <D gridWidth={gridWidth} gridHeight={gridHeight}>
@@ -377,11 +493,73 @@ const NoteEditor = ({ score }: { score: Score }) => {
           score={score}
           pitchToY={pitchToY}
         />
+
+        {/* Hover overlay for edit mode */}
+        {isEditMode && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: `${gridWidth}px`,
+              height: `${gridHeight}px`,
+              zIndex: 3,
+              cursor: "crosshair",
+            }}
+            onMouseMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+
+              const { start, end } = quantizeX(x, measures, beats);
+              const pitch = quantizeY(y, pitchToY);
+
+              // Only update if the note properties have actually changed
+              if (
+                !hoverNote ||
+                hoverNote.start !== start ||
+                hoverNote.end !== end ||
+                hoverNote.pitch !== pitch
+              ) {
+                const newHoverNote: Note = {
+                  start,
+                  end,
+                  pitch,
+                  state: "adding",
+                };
+                setHoverNote(newHoverNote);
+              }
+            }}
+            onMouseLeave={() => {
+              setHoverNote(null);
+            }}
+            onClick={() => {
+              if (hoverNote) {
+                // Add the hover note permanently to the score
+                const newNotes = [
+                  ...score.notes,
+                  {
+                    start: hoverNote.start,
+                    end: hoverNote.end,
+                    pitch: hoverNote.pitch,
+                  },
+                ];
+                setScore({ ...score, notes: newNotes });
+                setHoverNote(null);
+              }
+            }}
+          />
+        )}
+
         <RenderedNotes
-          score={score}
+          score={{
+            ...score,
+            notes: hoverNote ? [...score.notes, hoverNote] : score.notes,
+          }}
           secondToX={secondToX}
           pitchToY={pitchToY}
           playingNotes={playingNotes}
+          onNoteClick={handleNoteClick}
         />
       </D>
     </div>
