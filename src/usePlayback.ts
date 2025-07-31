@@ -8,8 +8,35 @@ export const usePlayback = () => {
   const [playingNotes, setPlayingNotes] = useState<Set<number>>(new Set());
   const synthRef = useRef<Tone.PolySynth | null>(null);
   const scheduledEventsRef = useRef<number[]>([]);
+  const [synthInitialized, setSynthInitialized] = useState(false);
 
-  // Initialize synth on first use
+  // Initialize synth immediately when hook is used
+  useEffect(() => {
+    const initSynth = async () => {
+      if (!synthRef.current) {
+        await Tone.start();
+        // Create a piano-like synth using PolySynth with a nice piano-ish sound
+        const synth = new Tone.PolySynth(Tone.Synth, {
+          oscillator: {
+            type: "triangle",
+          },
+          envelope: {
+            attack: 0.02,
+            decay: 0.1,
+            sustain: 0.3,
+            release: 1,
+          },
+        }).toDestination();
+
+        synthRef.current = synth;
+        setSynthInitialized(true);
+      }
+    };
+
+    initSynth();
+  }, []);
+
+  // Initialize synth on first use (fallback for play function)
   const initializeSynth = useCallback(async () => {
     if (!synthRef.current) {
       await Tone.start();
@@ -114,6 +141,32 @@ export const usePlayback = () => {
     }
   }, []);
 
+  const playNote = useCallback(
+    (pitch: number, duration: number = 0.3) => {
+      // Only play if synth is initialized
+      if (!synthInitialized || !synthRef.current) {
+        return;
+      }
+
+      try {
+        // Convert MIDI to frequency using direct math - fastest possible
+        // frequency = 440 * 2^((pitch - 69) / 12)
+        const frequency = 440 * Math.pow(2, (pitch - 69) / 12);
+
+        // Play note immediately with specified duration using frequency
+        synthRef.current.triggerAttackRelease(
+          frequency,
+          duration,
+          undefined,
+          0.6
+        );
+      } catch (error) {
+        console.error("Error playing note:", error);
+      }
+    },
+    [synthInitialized]
+  );
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -124,5 +177,5 @@ export const usePlayback = () => {
     };
   }, [stop]);
 
-  return { isPlaying, playingNotes, play, stop };
+  return { isPlaying, playingNotes, play, stop, playNote };
 };

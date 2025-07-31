@@ -1,5 +1,5 @@
-import { useMemo, useState, useCallback } from "react";
-import { Play, Square, Edit } from "lucide-react";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { Play, Square, Pencil } from "lucide-react";
 import { usePlayback } from "./usePlayback";
 import type { Note, Score } from "./types";
 
@@ -310,10 +310,19 @@ const D = ({
 };
 
 const NoteEditor = ({ score: initialScore }: { score: Score }) => {
-  const { isPlaying, playingNotes, play, stop } = usePlayback();
+  const { isPlaying, playingNotes, play, stop, playNote } = usePlayback();
   const [isEditMode, setIsEditMode] = useState(false);
   const [score, setScore] = useState(initialScore);
   const [hoverNote, setHoverNote] = useState<Note | null>(null);
+  const [lastHoverPitch, setLastHoverPitch] = useState<number | null>(null);
+
+  // Reset hover state when edit mode is disabled
+  useEffect(() => {
+    if (!isEditMode) {
+      setHoverNote(null);
+      setLastHoverPitch(null);
+    }
+  }, [isEditMode]);
 
   // Quantization functions
   const quantizeX = useCallback(
@@ -466,20 +475,31 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
             alignItems: "center",
             justifyContent: "center",
             padding: "8px",
-            backgroundColor: "transparent",
-            color: isEditMode ? "#fff" : "#ccc",
+            backgroundColor: isEditMode ? "#fff" : "transparent",
+            color: isEditMode ? "#000" : "#ccc",
             border: "none",
             cursor: "pointer",
-            transition: "color 0.2s ease",
+            borderRadius: "4px",
+            transition: "all 0.2s ease",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#fff";
+            if (isEditMode) {
+              e.currentTarget.style.backgroundColor = "#ccc";
+              e.currentTarget.style.color = "#000";
+            } else {
+              e.currentTarget.style.color = "#fff";
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = isEditMode ? "#fff" : "#ccc";
+            if (isEditMode) {
+              e.currentTarget.style.backgroundColor = "#fff";
+              e.currentTarget.style.color = "#000";
+            } else {
+              e.currentTarget.style.color = "#ccc";
+            }
           }}
         >
-          <Edit size={20} />
+          <Pencil size={20} />
         </button>
       </div>
 
@@ -521,6 +541,11 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
                 hoverNote.end !== end ||
                 hoverNote.pitch !== pitch
               ) {
+                // Play note sound if pitch changed
+                if (lastHoverPitch !== null && lastHoverPitch !== pitch) {
+                  playNote(pitch);
+                }
+
                 const newHoverNote: Note = {
                   start,
                   end,
@@ -528,13 +553,18 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
                   state: "adding",
                 };
                 setHoverNote(newHoverNote);
+                setLastHoverPitch(pitch);
               }
             }}
             onMouseLeave={() => {
               setHoverNote(null);
+              setLastHoverPitch(null);
             }}
             onClick={() => {
               if (hoverNote) {
+                // Play note sound when adding to score
+                playNote(hoverNote.pitch);
+
                 // Add the hover note permanently to the score
                 const newNotes = [
                   ...score.notes,
@@ -546,6 +576,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
                 ];
                 setScore({ ...score, notes: newNotes });
                 setHoverNote(null);
+                setLastHoverPitch(null);
               }
             }}
           />
