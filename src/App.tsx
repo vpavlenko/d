@@ -543,7 +543,10 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
     minPitch,
     maxPitch,
   } = useMemo(() => {
-    const highestNoteEnd = 5; // Math.max(...score.notes.map((note) => note.end));
+    const highestNoteEnd =
+      isEditMode || score.notes.length === 0
+        ? 5
+        : Math.max(...score.notes.map((note) => note.end));
 
     // Fix: Use the VERY LAST measure (ceiling of highest note end)
     const lastMeasure = Math.ceil(highestNoteEnd);
@@ -562,9 +565,15 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
       .filter((beat) => !measuresSet.has(beat))
       .sort((a, b) => a - b);
 
-    // Calculate dynamic dimensions
-    const minPitch = 36 + score.tonic; // Math.min(...score.notes.map((note) => note.pitch));
-    const maxPitch = 84 + score.tonic; // Math.max(...score.notes.map((note) => note.pitch));
+    // Calculate dynamic dimensions - use hardcoded values when editing, calculated when not
+    const minPitch =
+      isEditMode || score.notes.length === 0
+        ? 36 + score.tonic
+        : Math.min(...score.notes.map((note) => note.pitch));
+    const maxPitch =
+      isEditMode || score.notes.length === 0
+        ? 84 + score.tonic
+        : Math.max(...score.notes.map((note) => note.pitch));
     const gridHeight =
       (maxPitch - minPitch) * PITCH_DISTANCE + NOTE_HEIGHT + HEADER_HEIGHT;
     const gridWidth = lastMeasure * PX_PER_SECOND; // Use lastMeasure instead of highestNoteEnd
@@ -587,7 +596,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
       minPitch,
       maxPitch,
     };
-  }, [score]);
+  }, [score, isEditMode]);
 
   return (
     <div>
