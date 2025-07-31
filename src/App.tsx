@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { Play, Square, Pencil } from "lucide-react";
 import { usePlayback } from "./usePlayback";
+import { Grid } from "./Grid";
 import type { Note, Score } from "./types";
 
 const COLORS = [
@@ -18,10 +19,10 @@ const COLORS = [
   "#ffff00",
 ];
 
-const PX_PER_SECOND = 200;
-const PITCH_DISTANCE = 10;
-const NOTE_HEIGHT = 2 * PITCH_DISTANCE;
-const HEADER_HEIGHT = 20;
+export const PX_PER_SECOND = 200;
+export const PITCH_DISTANCE = 10;
+export const NOTE_HEIGHT = 2 * PITCH_DISTANCE;
+export const HEADER_HEIGHT = 20;
 
 const notes: Note[] = [
   { start: 0, end: 0.25, pitch: 60 },
@@ -40,132 +41,6 @@ const notes: Note[] = [
 ];
 
 const score: Score = { notes, tonic: 0 };
-
-const OctaveGrid = ({
-  score,
-  pitchToY,
-  gridWidth,
-  minPitch,
-  maxPitch,
-}: {
-  score: Score;
-  pitchToY: (pitch: number) => number;
-  gridWidth: number;
-  minPitch: number;
-  maxPitch: number;
-}) => {
-  const octaveLines = [];
-
-  for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
-    const pitchClass = ((pitch % 12) + 12) % 12;
-    const tonic = score.tonic;
-
-    if (pitchClass === tonic) {
-      octaveLines.push(
-        <div
-          key={`tonic-${pitch}`}
-          style={{
-            position: "absolute",
-            left: 0,
-            top: `${pitchToY(pitch) + NOTE_HEIGHT}px`, // Bottom of the pitch
-            width: `${gridWidth}px`,
-            height: 0,
-            borderTop: "0.5px solid #999",
-            zIndex: 1,
-          }}
-        />
-      );
-    }
-
-    if (pitchClass === (tonic - 5 + 12) % 12) {
-      octaveLines.push(
-        <div
-          key={`dashed-${pitch}`}
-          style={{
-            position: "absolute",
-            left: 0,
-            top: `${pitchToY(pitch) + NOTE_HEIGHT}px`, // Bottom of the pitch
-            width: `${gridWidth}px`,
-            height: 0,
-            borderTop: "0.5px dashed #666",
-            zIndex: 1,
-          }}
-        />
-      );
-    }
-  }
-
-  return <>{octaveLines}</>;
-};
-
-const MeasuresGrid = ({
-  measures,
-  beats,
-  secondToX,
-  gridHeight,
-}: {
-  measures: number[];
-  beats: number[];
-  secondToX: (second: number) => number;
-  gridHeight: number;
-}) => {
-  return (
-    <>
-      {/* Measure bars */}
-      {measures.map((measure) => (
-        <div
-          key={`measure-${measure}`}
-          style={{
-            position: "absolute",
-            left: `${secondToX(measure)}px`,
-            top: 0,
-            width: 0,
-            height: `${gridHeight}px`,
-            border: "0.5px solid #999",
-            zIndex: 1,
-          }}
-        />
-      ))}
-
-      {/* Beat bars */}
-      {beats.map((beat) => (
-        <div
-          key={`beat-${beat}`}
-          style={{
-            position: "absolute",
-            left: `${secondToX(beat)}px`,
-            top: 0,
-            width: 0,
-            height: `${gridHeight}px`,
-            border: "0.5px dashed #333",
-            zIndex: 2,
-          }}
-        />
-      ))}
-
-      {/* Measure numbers */}
-      {measures.slice(0, -1).map((measure) => (
-        <div
-          key={`measure-number-${measure}`}
-          style={{
-            position: "absolute",
-            left: `${secondToX(measure) + 5}px`,
-            top: "5px",
-            color: "#ccc",
-            fontSize: "12px",
-            fontWeight: "bold",
-            zIndex: 3,
-            fontFamily: "sans-serif",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        >
-          {measure}
-        </div>
-      ))}
-    </>
-  );
-};
 
 // Scale degree mapping array
 const SCALE_DEGREES = [
@@ -315,46 +190,6 @@ const RenderedNotes = ({
           </div>
         );
       })}
-    </>
-  );
-};
-
-const Grid = ({
-  measures,
-  beats,
-  secondToX,
-  gridHeight,
-  gridWidth,
-  score,
-  pitchToY,
-  minPitch,
-  maxPitch,
-}: {
-  measures: number[];
-  beats: number[];
-  secondToX: (second: number) => number;
-  gridHeight: number;
-  gridWidth: number;
-  score: Score;
-  pitchToY: (pitch: number) => number;
-  minPitch: number;
-  maxPitch: number;
-}) => {
-  return (
-    <>
-      <OctaveGrid
-        score={score}
-        pitchToY={pitchToY}
-        gridWidth={gridWidth}
-        minPitch={minPitch}
-        maxPitch={maxPitch}
-      />
-      <MeasuresGrid
-        measures={measures}
-        beats={beats}
-        secondToX={secondToX}
-        gridHeight={gridHeight}
-      />
     </>
   );
 };
