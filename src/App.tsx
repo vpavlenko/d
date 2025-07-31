@@ -20,25 +20,12 @@ const COLORS = [
 ];
 
 export const PX_PER_SECOND = 200;
+export const EIGHTH_NOTE_DURATION = 0.125; // 1/8th note in seconds
 export const PITCH_DISTANCE = 10;
 export const NOTE_HEIGHT = 2 * PITCH_DISTANCE;
 export const HEADER_HEIGHT = 20;
 
-const notes: Note[] = [
-  { start: 0, end: 0.25, pitch: 60 },
-  { start: 0.25, end: 0.5, pitch: 61 },
-  { start: 0.5, end: 0.75, pitch: 62 },
-  { start: 0.75, end: 1, pitch: 63 },
-  { start: 1, end: 1.25, pitch: 64 },
-  { start: 1.25, end: 1.5, pitch: 65 },
-  { start: 1.5, end: 1.75, pitch: 66 },
-  { start: 1.75, end: 2, pitch: 67 },
-  { start: 2, end: 2.25, pitch: 68 },
-  { start: 2.25, end: 2.5, pitch: 69 },
-  { start: 2.5, end: 2.75, pitch: 70 },
-  { start: 2.75, end: 3, pitch: 71 },
-  { start: 3, end: 3.25, pitch: 72 },
-];
+const notes: Note[] = [{ start: 0, end: 0.25, pitch: 60 }];
 
 const score: Score = { notes, tonic: 0 };
 
@@ -226,7 +213,6 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [score, setScore] = useState(initialScore);
   const [hoverNote, setHoverNote] = useState<Note | null>(null);
-  const [lastHoverPitch, setLastHoverPitch] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragNote, setDragNote] = useState<Note | null>(null);
   const [hoveredNoteIndex, setHoveredNoteIndex] = useState<number | null>(null);
@@ -235,7 +221,6 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   useEffect(() => {
     if (!isEditMode) {
       setHoverNote(null);
-      setLastHoverPitch(null);
       setIsDragging(false);
       setDragNote(null);
       setHoveredNoteIndex(null);
@@ -243,33 +228,6 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   }, [isEditMode]);
 
   // Quantization functions
-  const quantizeX = useCallback(
-    (x: number, measures: number[], beats: number[]) => {
-      const allTimePoints = [...measures, ...beats].sort((a, b) => a - b);
-      const second = x / PX_PER_SECOND;
-
-      // Find closest time point <= second for start
-      let start = 0;
-      for (let i = allTimePoints.length - 1; i >= 0; i--) {
-        if (allTimePoints[i] <= second) {
-          start = allTimePoints[i];
-          break;
-        }
-      }
-
-      // Find closest time point > second for end
-      let end = start + 0.25; // Default to quarter note
-      for (let i = 0; i < allTimePoints.length; i++) {
-        if (allTimePoints[i] > second) {
-          end = allTimePoints[i];
-          break;
-        }
-      }
-
-      return { start, end };
-    },
-    []
-  );
 
   const quantizeY = useCallback(
     (
@@ -280,33 +238,21 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
     ) => {
       // Find pitch where pitchToY(pitch) >= y and pitchToY(pitch-1) < y
 
-      for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
+      for (let pitch = minPitch - 1; pitch < maxPitch; pitch++) {
         const pitchY = pitchToY(pitch);
         const prevPitchY = pitchToY(pitch - 1);
 
         if (pitchY <= y && prevPitchY > y) {
-          return pitch;
+          return pitch + 1;
         }
       }
 
-      // Fallback to closest pitch
-      let closestPitch = minPitch;
-      let minDistance = Math.abs(pitchToY(minPitch) - y);
-
-      for (let pitch = minPitch + 1; pitch <= maxPitch; pitch++) {
-        const distance = Math.abs(pitchToY(pitch) - y);
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestPitch = pitch;
-        }
-      }
-
-      return closestPitch;
+      return maxPitch;
     },
     []
   );
 
-  // Fine-grained quantization for 16th notes during resize
+  // Fine-grained quantization for 16th notes
   const quantizeXFine = useCallback(
     (x: number, measures: number[], beats: number[]) => {
       // Create union of measures and beats, then add 3 additional values between each adjacent pair
@@ -330,19 +276,16 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
 
       const second = x / PX_PER_SECOND;
 
-      // Find the closest time point >= second for end position
-      let closestTime = fineTimePoints[0];
-      let minDistance = Math.abs(closestTime - second);
-
-      for (const timePoint of fineTimePoints) {
-        const distance = Math.abs(timePoint - second);
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestTime = timePoint;
+      // Find closest time point <= second for start
+      let start = 0;
+      for (let i = fineTimePoints.length - 1; i >= 0; i--) {
+        if (fineTimePoints[i] <= second) {
+          start = fineTimePoints[i];
+          break;
         }
       }
 
-      return closestTime;
+      return start;
     },
     []
   );
@@ -441,6 +384,22 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
     };
   }, [score, isEditMode]);
 
+  // Helper function to extract and quantize mouse coordinates
+  const quantizeMouseToMusic = useCallback(
+    (e: React.MouseEvent, targetElement: HTMLElement) => {
+      const rect = targetElement.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const start = quantizeXFine(x, measures, beats);
+      const end = start + EIGHTH_NOTE_DURATION;
+      const pitch = quantizeY(y, pitchToY, minPitch, maxPitch);
+
+      return { start, end, pitch, x, y };
+    },
+    [quantizeXFine, measures, beats, quantizeY, pitchToY, minPitch, maxPitch]
+  );
+
   return (
     <div>
       {/* Control buttons */}
@@ -529,12 +488,10 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
               cursor: isDragging ? "ew-resize" : "crosshair",
             }}
             onMouseDown={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-
-              const { start, end } = quantizeX(x, measures, beats);
-              const pitch = quantizeY(y, pitchToY, minPitch, maxPitch);
+              const { start, end, pitch } = quantizeMouseToMusic(
+                e,
+                e.currentTarget
+              );
 
               // Play note sound when starting drag
               playNote(pitch);
@@ -550,16 +507,14 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
               setIsDragging(true);
               setDragNote(initialNote);
               setHoverNote(null);
-              setLastHoverPitch(pitch);
             }}
             onMouseMove={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-
               if (isDragging && dragNote) {
                 // During drag: only update end position with fine quantization
-                const newEnd = quantizeXFine(x, measures, beats);
+                const { end: newEnd } = quantizeMouseToMusic(
+                  e,
+                  e.currentTarget
+                );
 
                 // Ensure end is not before start
                 const finalEnd = Math.max(newEnd, dragNote.start + 0.0625); // Minimum 16th note length
@@ -571,8 +526,10 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
                 setDragNote(updatedDragNote);
               } else {
                 // Normal hover behavior when not dragging
-                const { start, end } = quantizeX(x, measures, beats);
-                const pitch = quantizeY(y, pitchToY, minPitch, maxPitch);
+                const { start, end, pitch } = quantizeMouseToMusic(
+                  e,
+                  e.currentTarget
+                );
 
                 // Only update if the note properties have actually changed
                 if (
@@ -581,11 +538,6 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
                   hoverNote.end !== end ||
                   hoverNote.pitch !== pitch
                 ) {
-                  // Play note sound if pitch changed
-                  if (lastHoverPitch !== pitch) {
-                    playNote(pitch);
-                  }
-
                   const newHoverNote: Note = {
                     start,
                     end,
@@ -593,7 +545,6 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
                     state: "adding",
                   };
                   setHoverNote(newHoverNote);
-                  setLastHoverPitch(pitch);
                 }
               }
             }}
@@ -614,13 +565,11 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
                 setIsDragging(false);
                 setDragNote(null);
                 setHoverNote(null);
-                setLastHoverPitch(null);
               }
             }}
             onMouseLeave={() => {
               if (!isDragging) {
                 setHoverNote(null);
-                setLastHoverPitch(null);
               }
             }}
           />
