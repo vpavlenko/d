@@ -1,8 +1,9 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { Play, Square, Pencil } from "lucide-react";
+import { Play, Square, Pencil, Copy } from "lucide-react";
 import { usePlayback } from "./usePlayback";
 import { Grid } from "./Grid";
-import type { Note, Score } from "./types";
+import type { Note, Score, VersionedScores } from "./types";
+import { defaultScores } from "./scores";
 
 const COLORS = [
   "#ffffff",
@@ -25,29 +26,34 @@ export const PITCH_DISTANCE = 10;
 export const NOTE_HEIGHT = 2 * PITCH_DISTANCE;
 export const HEADER_HEIGHT = 20;
 
-const notes: Note[] = [{ start: 0, end: 0.25, pitch: 60 }];
+// localStorage utilities
+const SCORES_STORAGE_KEY = "music-scores";
 
-const scores: Score[] = [
-  { notes, tonic: 0, description: "First score" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-  { notes, tonic: 0, description: "Its bass line" },
-];
+const loadScoresFromStorage = (): VersionedScores => {
+  try {
+    const stored = localStorage.getItem(SCORES_STORAGE_KEY);
+    if (stored) {
+      const parsedData = JSON.parse(stored);
+      // Handle migration from old format (Score[]) to new format (VersionedScores)
+      if (Array.isArray(parsedData)) {
+        return { scores: parsedData, version: 1 };
+      }
+      return parsedData;
+    }
+    return defaultScores;
+  } catch (error) {
+    console.error("Failed to load scores from localStorage:", error);
+    return defaultScores;
+  }
+};
+
+const saveScoresToStorage = (versionedScores: VersionedScores): void => {
+  try {
+    localStorage.setItem(SCORES_STORAGE_KEY, JSON.stringify(versionedScores));
+  } catch (error) {
+    console.error("Failed to save scores to localStorage:", error);
+  }
+};
 
 // Scale degree mapping array
 const SCALE_DEGREES = [
@@ -275,10 +281,18 @@ const NoteEditor = ({
   const [dragNote, setDragNote] = useState<Note | null>(null);
   const [hoveredNoteIndex, setHoveredNoteIndex] = useState<number | null>(null);
 
-  // Update parent when score changes
+  // Sync with parent score when it changes from outside
   useEffect(() => {
-    onScoreChange(score);
-  }, [score, onScoreChange]);
+    setScore(initialScore);
+  }, [initialScore]);
+
+  // Update parent only when we make internal changes (not when syncing from parent)
+  const notifyParentOfChange = useCallback(
+    (newScore: Score) => {
+      onScoreChange(newScore);
+    },
+    [onScoreChange]
+  );
 
   // Reset hover state when edit mode is disabled
   useEffect(() => {
@@ -365,29 +379,35 @@ const NoteEditor = ({
           end: note.end,
           pitch: note.pitch,
         };
-        setScore({ ...score, notes: newNotes });
+        const updatedScore = { ...score, notes: newNotes };
+        setScore(updatedScore);
+        notifyParentOfChange(updatedScore);
       }
     },
-    [score]
+    [score, notifyParentOfChange]
   );
 
   const handleNoteDelete = useCallback(
     (index: number) => {
       // Remove the note from the score
       const newNotes = score.notes.filter((_, i) => i !== index);
-      setScore({ ...score, notes: newNotes });
+      const updatedScore = { ...score, notes: newNotes };
+      setScore(updatedScore);
+      notifyParentOfChange(updatedScore);
 
       // Reset hover state to prevent stale index references
       setHoveredNoteIndex(null);
     },
-    [score]
+    [score, notifyParentOfChange]
   );
 
   const handleDescriptionChange = useCallback(
     (newDescription: string) => {
-      setScore({ ...score, description: newDescription });
+      const updatedScore = { ...score, description: newDescription };
+      setScore(updatedScore);
+      notifyParentOfChange(updatedScore);
     },
-    [score]
+    [score, notifyParentOfChange]
   );
 
   const {
@@ -481,7 +501,7 @@ const NoteEditor = ({
   );
 
   return (
-    <div style={{ marginLeft: "30px" }}>
+    <div style={{ marginLeft: "30px", marginBottom: "100px" }}>
       {/* Control buttons */}
       <div style={{ marginBottom: "10px", display: "flex", gap: "8px" }}>
         <button
@@ -651,7 +671,9 @@ const NoteEditor = ({
                         pitch: dragNote.pitch,
                       },
                     ];
-                    setScore({ ...score, notes: newNotes });
+                    const updatedScore = { ...score, notes: newNotes };
+                    setScore(updatedScore);
+                    notifyParentOfChange(updatedScore);
 
                     // Reset drag state
                     setIsDragging(false);
@@ -728,16 +750,77 @@ const NoteEditor = ({
 };
 
 function App() {
-  const [appScores, setAppScores] = useState(scores);
+  const [versionedScores, setVersionedScores] = useState<VersionedScores>(
+    () => {
+      const loaded = loadScoresFromStorage();
+      return loaded;
+    }
+  );
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [scoresOrigin, setScoresOrigin] = useState<"source" | "localStorage">(
+    "localStorage"
+  );
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Version comparison and origin tracking on initial load
+  useEffect(() => {
+    const storedData = loadScoresFromStorage();
+    if (defaultScores.version > storedData.version) {
+      setVersionedScores(defaultScores);
+      setScoresOrigin("source");
+      setHasChanges(false); // No changes yet when loading from source
+    } else {
+      setScoresOrigin("localStorage");
+      setHasChanges(false); // No changes yet
+    }
+  }, []);
 
   const handleScoreChange = useCallback(
     (index: number) => (updatedScore: Score) => {
-      setAppScores((prev) =>
-        prev.map((score, i) => (i === index ? updatedScore : score))
-      );
+      // Determine if we should save based on current state
+      const shouldSave = scoresOrigin === "localStorage" || !hasChanges;
+
+      setVersionedScores((prev) => {
+        const updated = {
+          ...prev,
+          scores: prev.scores.map((score, i) =>
+            i === index ? updatedScore : score
+          ),
+          version: shouldSave ? prev.version + 1 : prev.version,
+        };
+
+        // Save to localStorage if needed
+        if (shouldSave) {
+          saveScoresToStorage(updated);
+        }
+
+        return updated;
+      });
+
+      // Update state flags after the main state update
+      setHasChanges(true);
+      if (shouldSave) {
+        setScoresOrigin("localStorage");
+      }
     },
-    []
+    [scoresOrigin, hasChanges]
   );
+
+  const copyScoresAsJson = useCallback(async () => {
+    try {
+      // Create a copy with bumped version only for clipboard
+      const copyData = {
+        ...versionedScores,
+        version: versionedScores.version + 1,
+      };
+      const jsonString = JSON.stringify(copyData, null, 2);
+      await navigator.clipboard.writeText(jsonString);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy scores:", error);
+    }
+  }, [versionedScores]);
 
   return (
     <div
@@ -747,16 +830,85 @@ function App() {
         flexDirection: "column",
         padding: "20px",
         gap: "20px",
+        minHeight: "100vh",
       }}
     >
-      {appScores.map((score, index) => (
+      {versionedScores.scores.map((score, index) => (
         <div
           key={index}
-          style={{ display: "flex", justifyContent: "flex-start" }}
+          style={{
+            display: "flex",
+          }}
         >
           <NoteEditor score={score} onScoreChange={handleScoreChange(index)} />
         </div>
       ))}
+
+      {/* Footer with copy button */}
+      <div
+        style={{
+          marginTop: "40px",
+          paddingTop: "20px",
+          borderTop: "1px solid #333",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "10px",
+        }}
+      >
+        <button
+          onClick={copyScoresAsJson}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "10px 16px",
+            backgroundColor: copySuccess ? "#333" : "transparent",
+            color: copySuccess ? "#fff" : "#ccc",
+            border: "1px solid #666",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontFamily: "Arial, sans-serif",
+            fontSize: "14px",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            if (!copySuccess) {
+              e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.borderColor = "#999";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!copySuccess) {
+              e.currentTarget.style.color = "#ccc";
+              e.currentTarget.style.borderColor = "#666";
+            }
+          }}
+        >
+          <Copy size={16} />
+          {copySuccess ? "Copied!" : "Copy All Scores as JSON"}
+        </button>
+      </div>
+
+      {/* Version display */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          backgroundColor: "#333",
+          color: "#ccc",
+          padding: "8px 12px",
+          borderRadius: "4px",
+          border: "1px solid #666",
+          fontFamily: "Arial, sans-serif",
+          fontSize: "12px",
+          zIndex: 1000,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+        }}
+      >
+        v{versionedScores.version} ({scoresOrigin})
+      </div>
     </div>
   );
 }

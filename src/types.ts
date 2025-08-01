@@ -14,3 +14,8 @@ export type Score = {
   tonic: PitchClass;
   description: string;
 };
+
+export type VersionedScores = {
+  scores: Score[];
+  version: number;
+};
