@@ -490,9 +490,16 @@ const NoteEditor = ({
   );
 
   return (
-    <div style={{ marginLeft: "30px", marginBottom: "100px" }}>
+    <div style={{ marginBottom: "100px" }}>
       {/* Control buttons */}
-      <div style={{ marginBottom: "10px", display: "flex", gap: "8px" }}>
+      <div
+        style={{
+          marginBottom: "10px",
+          display: "flex",
+          justifyContent: "center",
+          gap: "8px",
+        }}
+      >
         <button
           onClick={() => (isPlaying ? stop() : play(score, editorId))}
           style={{
@@ -554,7 +561,14 @@ const NoteEditor = ({
       {/* Flexbox layout: Description (200px) + Grid (rest) */}
       <div style={{ display: "flex", gap: "100px" }}>
         {/* Description column - 200px fixed */}
-        <div style={{ width: "20em", flexShrink: 0 }}>
+        <div
+          style={{
+            width: "25em",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           {isEditMode ? (
             <textarea
               value={score.description}
@@ -799,6 +813,8 @@ function App() {
             key={index}
             style={{
               display: "flex",
+              margin: "auto",
+              marginBottom: "100px",
             }}
           >
             <NoteEditor
