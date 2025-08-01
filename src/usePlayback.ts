@@ -91,11 +91,32 @@ export const usePlayback = () => {
           return;
         }
 
+        console.log(
+          `🎬 Starting playback on ${editorId} - PANIC KILLING all previous notes first!`
+        );
+
+        // PANIC: Immediately kill all currently playing notes before starting new playback
+        console.log(
+          "🔇 Panic-stopping all current notes before new playback..."
+        );
+        sampler.releaseAll(Tone.now());
+
+        // Extra safety: also trigger release on all possible notes
+        const allNotes = Array.from({ length: 88 }, (_, i) =>
+          Tone.Frequency(21 + i, "midi").toNote()
+        );
+        sampler.triggerRelease(allNotes, Tone.now());
+        console.log("✅ All previous notes killed, starting new playback");
+
         // CRITICAL: Clear ALL existing scheduled events (from all editors)
+        console.log(
+          "📅 Clearing all scheduled events from previous playback..."
+        );
         scheduledEventsRef.current.forEach((id) => Tone.Transport.clear(id));
         scheduledEventsRef.current = [];
 
         // Reset transport
+        console.log("⏹️ Resetting Transport for new playback");
         Tone.Transport.stop();
         Tone.Transport.position = 0;
 
@@ -125,10 +146,10 @@ export const usePlayback = () => {
           const startEventId = Tone.Transport.schedule((time) => {
             // Convert MIDI number to note name
             const noteName = Tone.Frequency(note.pitch, "midi").toNote();
-            const duration = realEndTime - realStartTime;
 
-            // Trigger note with duration
-            sampler.triggerAttackRelease(noteName, duration, time, 0.8);
+            // Trigger note START only (not release - we'll schedule that separately)
+            console.log("🎵 Starting note:", noteName, "at time:", time);
+            sampler.triggerAttack(noteName, time, 0.8);
 
             // Update UI to show this note is playing for this specific editor
             setPlayingNotesByEditor((prev) => {
@@ -139,8 +160,15 @@ export const usePlayback = () => {
             });
           }, `${realStartTime}`);
 
-          // Schedule note end (for UI only, audio handled by triggerAttackRelease)
-          const endEventId = Tone.Transport.schedule(() => {
+          // Schedule note end (both audio release and UI update)
+          const endEventId = Tone.Transport.schedule((time) => {
+            // Convert MIDI number to note name
+            const noteName = Tone.Frequency(note.pitch, "midi").toNote();
+
+            // Trigger note RELEASE
+            console.log("🎵 Releasing note:", noteName, "at time:", time);
+            sampler.triggerRelease(noteName, time);
+
             // Update UI to remove this note from playing for this specific editor
             setPlayingNotesByEditor((prev) => {
               const newMap = new Map(prev);
@@ -183,23 +211,56 @@ export const usePlayback = () => {
   );
 
   const stop = useCallback(() => {
-    // Clear all scheduled events
+    console.log("🚨 PANIC STOP TRIGGERED!");
+
+    // PANIC FUNCTIONALITY: Immediately kill all audio
+
+    // Clear all scheduled events FIRST
+    console.log(
+      "📅 Clearing scheduled events, count:",
+      scheduledEventsRef.current.length
+    );
     scheduledEventsRef.current.forEach((id) => Tone.Transport.clear(id));
     scheduledEventsRef.current = [];
 
-    // Stop transport
+    // Stop transport immediately
+    console.log("⏹️ Stopping Transport");
     Tone.Transport.stop();
     Tone.Transport.position = 0;
 
+    // CRITICAL: Stop all sampler notes immediately with current time
+    if (samplerRef.current) {
+      console.log("🎹 Sampler found, attempting to kill all notes");
+      console.log("⏰ Current Tone time:", Tone.now());
+
+      // Release all notes at the current audio context time (immediate)
+      console.log("🔇 Calling releaseAll...");
+      samplerRef.current.releaseAll(Tone.now());
+
+      // For extra safety: also trigger release on all possible notes
+      // This ensures even stuck notes are killed
+      console.log("🎯 Triggering release on all 88 keys as failsafe...");
+      const allNotes = Array.from({ length: 88 }, (_, i) =>
+        Tone.Frequency(21 + i, "midi").toNote()
+      );
+      console.log(
+        "🎼 Generated notes:",
+        allNotes.slice(0, 5),
+        "... (88 total)"
+      );
+      samplerRef.current.triggerRelease(allNotes, Tone.now());
+      console.log("✅ Failsafe release completed");
+    } else {
+      console.log("❌ No sampler found!");
+    }
+
     // Reset state
+    console.log("🔄 Resetting UI state");
     setIsPlaying(false);
     setCurrentPlayingEditorId(null);
     setPlayingNotesByEditor(new Map());
 
-    // Stop all sampler notes
-    if (samplerRef.current) {
-      samplerRef.current.releaseAll();
-    }
+    console.log("✅ PANIC STOP COMPLETED!");
   }, []);
 
   // Helper function to get playing notes for a specific editor

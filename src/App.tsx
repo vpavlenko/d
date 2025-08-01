@@ -235,8 +235,7 @@ const RenderedNotes = ({
                 fontSize: `${NOTE_HEIGHT}px`,
                 fontWeight: "bold",
                 boxShadow: haloEffect,
-                transition:
-                  "box-shadow 0.1s ease-in-out, transform 0.1s ease-in-out",
+                transition: "transform 0.1s ease-in-out",
                 transform,
               }}
             >
