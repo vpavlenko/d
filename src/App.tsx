@@ -508,7 +508,7 @@ const NoteEditor = ({
   return (
     <div style={{ marginBottom: "100px" }}>
       {/* Four-column layout: Description + Play Button + Grid + Edit Button */}
-      <div style={{ display: "flex", gap: "20px" }}>
+      <div style={{ display: "flex", gap: "0px" }}>
         {/* Description column - 25em fixed */}
         <div
           style={{
@@ -549,12 +549,11 @@ const NoteEditor = ({
           )}
         </div>
 
-        {/* Play button column - shrink to content, vertically centered */}
+        {/* Play button column - shrink to content, full height */}
         <div
           style={{
             flex: 0,
             display: "flex",
-            alignItems: "center",
           }}
         >
           <button
@@ -563,12 +562,13 @@ const NoteEditor = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: "8px",
+              padding: "8px 18px",
               backgroundColor: "transparent",
               color: "#888",
               border: "none",
               cursor: "pointer",
               transition: "color 0.2s ease",
+              height: "100%",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = "#fff";
@@ -726,12 +726,11 @@ const NoteEditor = ({
           </div>
         </div>
 
-        {/* Edit button column - shrink to content, vertically centered */}
+        {/* Edit button column - shrink to content, full height */}
         <div
           style={{
             flex: 0,
             display: "flex",
-            alignItems: "center",
           }}
         >
           <button
@@ -740,13 +739,14 @@ const NoteEditor = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: "8px",
+              padding: "8px 18px",
               backgroundColor: isEditMode ? "#fff" : "transparent",
               color: isEditMode ? "#000" : "#888",
               border: "none",
               cursor: "pointer",
               borderRadius: "4px",
               transition: "all 0.2s ease",
+              height: "100%",
             }}
             onMouseEnter={(e) => {
               if (isEditMode) {
