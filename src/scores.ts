@@ -1184,7 +1184,8 @@ export const defaultScores: VersionedScores = {
         },
       ],
       tonic: 9,
-      description: "We can layer colors across many octaves",
+      description:
+        "We can layer colors across many octaves. Each chord is a flag of three or more colors, kinda like 🇱🇺 🇱🇹 🇬🇦 🇦🇲",
     },
     {
       notes: [
@@ -3142,5 +3143,5 @@ export const defaultScores: VersionedScores = {
         "Yiruma sustains notes with a pedal till the end of every measure, so the actual sound is more like this. As the drawn out sustained notes are harder to read, we'll use the shorter ones",
     },
   ],
-  version: 4421,
+  version: 4504,
 };
