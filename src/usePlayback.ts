@@ -12,7 +12,7 @@ const scoreSecondsToRealSeconds = (scoreSeconds: number): number => {
   return scoreSeconds * (REFERENCE_BPM / PLAYBACK_BPM);
 };
 
-// No loading progress needed - samples are bundled!
+// Samples are bundled - decoding happens in background without loading screen
 
 // Custom hook for playback functionality
 export const usePlayback = () => {
@@ -28,19 +28,40 @@ export const usePlayback = () => {
   const individualNoteTimeoutsRef = useRef<Map<string, number>>(new Map());
   const individualNoteReleasesRef = useRef<Map<string, string>>(new Map());
   const [samplerInitialized, setSamplerInitialized] = useState(false);
+  const [audioContextAllowed, setAudioContextAllowed] = useState<
+    boolean | null
+  >(null);
 
-  // Initialize sampler immediately when hook is used
+  // Check AudioContext state on mount
+  useEffect(() => {
+    const checkAudioContextState = () => {
+      if (Tone.context.state === "suspended") {
+        console.log("🚫 AudioContext is suspended - user interaction required");
+        setAudioContextAllowed(false);
+      } else {
+        console.log("✅ AudioContext is allowed");
+        setAudioContextAllowed(true);
+      }
+    };
+
+    checkAudioContextState();
+  }, []);
+
+  // Function to enable audio context (called on user interaction)
+  const enableAudioContext = useCallback(async () => {
+    try {
+      await Tone.start();
+      console.log("🎵 Tone.js audio context started via user interaction");
+      setAudioContextAllowed(true);
+    } catch (error) {
+      console.error("❌ Failed to start Tone.js:", error);
+    }
+  }, []);
+
+  // Initialize sampler when audio context is allowed
   useEffect(() => {
     const initSampler = async () => {
-      if (!samplerRef.current) {
-        // Start Tone.js context
-        try {
-          await Tone.start();
-          console.log("🎵 Tone.js audio context started");
-        } catch (error) {
-          console.error("❌ Failed to start Tone.js:", error);
-        }
-
+      if (!samplerRef.current && audioContextAllowed) {
         // Load all piano samples as AudioBuffers (from bundled ArrayBuffers)
         const audioBuffers = await loadPianoSamples();
 
@@ -66,8 +87,10 @@ export const usePlayback = () => {
       }
     };
 
-    initSampler();
-  }, []);
+    if (audioContextAllowed) {
+      initSampler();
+    }
+  }, [audioContextAllowed]);
 
   // Simple getter for the sampler instance
   const getSampler = useCallback(() => {
@@ -401,6 +424,7 @@ export const usePlayback = () => {
     play,
     stop,
     playNote,
-    samplerInitialized,
+    audioContextAllowed,
+    enableAudioContext,
   };
 };

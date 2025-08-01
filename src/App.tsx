@@ -7,7 +7,7 @@ import {
   useImperativeHandle,
   useRef,
 } from "react";
-import { Play, Square, Pencil } from "lucide-react";
+import { Play, Square, Pencil, Piano } from "lucide-react";
 import { usePlayback } from "./usePlayback";
 import { Grid } from "./Grid";
 import type { Note, Score } from "./types";
@@ -878,7 +878,8 @@ function App() {
     play,
     stop,
     playNote,
-    samplerInitialized,
+    audioContextAllowed,
+    enableAudioContext,
   } = usePlayback();
 
   // Check if we should show editing UI
@@ -914,8 +915,8 @@ function App() {
     };
   }, []);
 
-  // Show a simple loading screen while samples are being decoded
-  if (!samplerInitialized) {
+  // Show audio permission splash screen if AudioContext is not allowed
+  if (audioContextAllowed === false) {
     return (
       <div
         style={{
@@ -927,12 +928,15 @@ function App() {
           alignItems: "center",
           minHeight: "100vh",
           fontFamily: "monospace",
-          gap: "20px",
+          gap: "30px",
+          cursor: "pointer",
         }}
+        onClick={enableAudioContext}
       >
-        <div style={{ fontSize: "28px" }}>🎹 Loading Piano Samples...</div>
+        <Piano size={120} color="#fff" />
+        <div style={{ fontSize: "32px", fontWeight: "bold" }}>Let's play</div>
         <div style={{ fontSize: "16px", color: "#ccc" }}>
-          Decoding bundled audio files...
+          Click anywhere to enable audio
         </div>
       </div>
     );
