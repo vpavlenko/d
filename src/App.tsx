@@ -644,10 +644,6 @@ const NoteEditor = ({
                     e.currentTarget
                   );
 
-                  // Play note sound when starting drag
-                  // Use a short duration for creation feedback
-                  playNote(pitch, 0.3);
-
                   // Start dragging - create initial note with fixed pitch and start
                   const initialNote: Note = {
                     start,
@@ -843,10 +839,55 @@ function App() {
     play,
     stop,
     playNote,
+    samplerInitialized,
   } = usePlayback();
 
   // Check if we should show editing UI
   const showEditingUI = shouldShowEditingUI();
+
+  // Show loading screen while Tone.js samples are loading
+  if (!samplerInitialized) {
+    return (
+      <div
+        style={{
+          backgroundColor: "black",
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          fontFamily: "monospace",
+          gap: "20px",
+        }}
+      >
+        <div style={{ fontSize: "24px", color: "#ccc" }}>
+          Loading Tone.js...
+        </div>
+        <div
+          style={{
+            fontSize: "16px",
+            color: "#999",
+            textAlign: "center",
+            maxWidth: "600px",
+          }}
+        >
+          <div>🎹 Initializing Salamander Grand Piano samples</div>
+          <div style={{ marginTop: "10px", fontSize: "14px" }}>
+            Loading audio samples from: tonejs.github.io/audio/salamander/
+          </div>
+          <div style={{ marginTop: "10px", fontSize: "12px", opacity: 0.7 }}>
+            This may take a few seconds depending on your connection...
+          </div>
+        </div>
+        <div style={{ fontSize: "14px", color: "#666" }}>
+          <div>Tone.js Audio Context: Initializing</div>
+          <div>Sample Library: Salamander Grand Piano</div>
+          <div>Sample Count: ~30 audio files</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

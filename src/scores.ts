@@ -1104,7 +1104,7 @@ export const defaultScores: VersionedScores = {
         },
       ],
       tonic: 9,
-      description: "Of we can layer the notes of the chord together",
+      description: "Or we can layer the notes of the chord together",
     },
     {
       notes: [

@@ -408,5 +408,6 @@ export const usePlayback = () => {
     play,
     stop,
     playNote,
+    samplerInitialized,
   };
 };
