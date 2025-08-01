@@ -1,4 +1,12 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import {
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import { Play, Square, Pencil } from "lucide-react";
 import { usePlayback } from "./usePlayback";
 import { Grid } from "./Grid";
@@ -274,226 +282,197 @@ const RenderedNotes = ({
   );
 };
 
-const NoteEditor = ({
-  score: initialScore,
-  onScoreChange,
-  editorId,
-  isPlaying,
-  playingNotes,
-  individuallyPlayingNotes,
-  play,
-  stop,
-  playNote,
-  onAddNewScore,
-  showEditingUI,
-}: {
-  score: Score;
-  onScoreChange: (score: Score) => void;
-  editorId: string;
-  isPlaying: boolean;
-  playingNotes: Set<number>;
-  individuallyPlayingNotes: Set<number>;
-  play: (score: Score, editorId: string) => Promise<void>;
-  stop: () => void;
-  playNote: (
-    pitch: number,
-    duration: number,
-    noteIndex?: number,
-    editorId?: string
-  ) => void;
-  onAddNewScore: () => void;
-  showEditingUI: boolean;
-}) => {
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [score, setScore] = useState(initialScore);
-  const [hoverNote, setHoverNote] = useState<Note | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragNote, setDragNote] = useState<Note | null>(null);
-  const [hoveredNoteIndex, setHoveredNoteIndex] = useState<number | null>(null);
+export interface NoteEditorRef {
+  exitEditMode: () => void;
+}
 
-  // Sync with parent score when it changes from outside
-  useEffect(() => {
-    setScore(initialScore);
-  }, [initialScore]);
-
-  // Update parent only when we make internal changes (not when syncing from parent)
-  const notifyParentOfChange = useCallback(
-    (newScore: Score) => {
-      onScoreChange(newScore);
+const NoteEditor = forwardRef<
+  NoteEditorRef,
+  {
+    score: Score;
+    onScoreChange: (score: Score) => void;
+    editorId: string;
+    isPlaying: boolean;
+    playingNotes: Set<number>;
+    individuallyPlayingNotes: Set<number>;
+    play: (score: Score, editorId: string) => Promise<void>;
+    stop: () => void;
+    playNote: (
+      pitch: number,
+      duration: number,
+      noteIndex?: number,
+      editorId?: string
+    ) => void;
+    onAddNewScore: () => void;
+    showEditingUI: boolean;
+  }
+>(
+  (
+    {
+      score: initialScore,
+      onScoreChange,
+      editorId,
+      isPlaying,
+      playingNotes,
+      individuallyPlayingNotes,
+      play,
+      stop,
+      playNote,
+      onAddNewScore,
+      showEditingUI,
     },
-    [onScoreChange]
-  );
+    ref
+  ) => {
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [score, setScore] = useState(initialScore);
+    const [hoverNote, setHoverNote] = useState<Note | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragNote, setDragNote] = useState<Note | null>(null);
+    const [hoveredNoteIndex, setHoveredNoteIndex] = useState<number | null>(
+      null
+    );
 
-  // Reset hover state when edit mode is disabled
-  useEffect(() => {
-    if (!isEditMode) {
-      setHoverNote(null);
-      setIsDragging(false);
-      setDragNote(null);
-      setHoveredNoteIndex(null);
-    }
-  }, [isEditMode]);
+    // Sync with parent score when it changes from outside
+    useEffect(() => {
+      setScore(initialScore);
+    }, [initialScore]);
 
-  // Quantization functions
+    // Update parent only when we make internal changes (not when syncing from parent)
+    const notifyParentOfChange = useCallback(
+      (newScore: Score) => {
+        onScoreChange(newScore);
+      },
+      [onScoreChange]
+    );
 
-  const quantizeY = useCallback(
-    (
-      y: number,
-      pitchToY: (pitch: number) => number,
-      minPitch: number,
-      maxPitch: number,
-      tonic: number
-    ) => {
-      for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
-        if (![0, 2, 4, 5, 7, 9, 11].includes((pitch - tonic + 12) % 12)) {
-          continue;
+    // Reset hover state when edit mode is disabled
+    useEffect(() => {
+      if (!isEditMode) {
+        setHoverNote(null);
+        setIsDragging(false);
+        setDragNote(null);
+        setHoveredNoteIndex(null);
+      }
+    }, [isEditMode]);
+
+    // Expose exitEditMode method to parent
+    useImperativeHandle(
+      ref,
+      () => ({
+        exitEditMode: () => {
+          setIsEditMode(false);
+        },
+      }),
+      []
+    );
+
+    // Quantization functions
+
+    const quantizeY = useCallback(
+      (
+        y: number,
+        pitchToY: (pitch: number) => number,
+        minPitch: number,
+        maxPitch: number,
+        tonic: number
+      ) => {
+        for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
+          if (![0, 2, 4, 5, 7, 9, 11].includes((pitch - tonic + 12) % 12)) {
+            continue;
+          }
+          const pitchY = pitchToY(pitch);
+
+          if (pitchY < y) {
+            return pitch;
+          }
         }
-        const pitchY = pitchToY(pitch);
 
-        if (pitchY < y) {
-          return pitch;
+        return maxPitch;
+      },
+      []
+    );
+
+    // Fine-grained quantization for 16th notes
+    const quantizeXFine = useCallback(
+      (x: number, measures: number[], beats: number[]) => {
+        // Create union of measures and beats, then add 3 additional values between each adjacent pair
+        const baseTimePoints = [...measures, ...beats].sort((a, b) => a - b);
+        const fineTimePoints: number[] = [];
+
+        for (let i = 0; i < baseTimePoints.length - 1; i++) {
+          const start = baseTimePoints[i];
+          const end = baseTimePoints[i + 1];
+          const segment = (end - start) / 4; // Divide each segment into 4 parts for 16th notes
+
+          fineTimePoints.push(start);
+          fineTimePoints.push(start + segment);
+          fineTimePoints.push(start + 2 * segment);
+          fineTimePoints.push(start + 3 * segment);
         }
-      }
-
-      return maxPitch;
-    },
-    []
-  );
-
-  // Fine-grained quantization for 16th notes
-  const quantizeXFine = useCallback(
-    (x: number, measures: number[], beats: number[]) => {
-      // Create union of measures and beats, then add 3 additional values between each adjacent pair
-      const baseTimePoints = [...measures, ...beats].sort((a, b) => a - b);
-      const fineTimePoints: number[] = [];
-
-      for (let i = 0; i < baseTimePoints.length - 1; i++) {
-        const start = baseTimePoints[i];
-        const end = baseTimePoints[i + 1];
-        const segment = (end - start) / 4; // Divide each segment into 4 parts for 16th notes
-
-        fineTimePoints.push(start);
-        fineTimePoints.push(start + segment);
-        fineTimePoints.push(start + 2 * segment);
-        fineTimePoints.push(start + 3 * segment);
-      }
-      // Add the last time point
-      if (baseTimePoints.length > 0) {
-        fineTimePoints.push(baseTimePoints[baseTimePoints.length - 1]);
-      }
-
-      const second = x / PX_PER_SECOND;
-
-      // Find closest time point <= second for start
-      let start = 0;
-      for (let i = fineTimePoints.length - 1; i >= 0; i--) {
-        if (fineTimePoints[i] <= second) {
-          start = fineTimePoints[i];
-          break;
+        // Add the last time point
+        if (baseTimePoints.length > 0) {
+          fineTimePoints.push(baseTimePoints[baseTimePoints.length - 1]);
         }
-      }
 
-      return start;
-    },
-    []
-  );
+        const second = x / PX_PER_SECOND;
 
-  const handleNoteClick = useCallback(
-    (index: number) => {
-      const note = score.notes[index];
-      if (note.state === "adding") {
-        // Add the note permanently by removing the "adding" state
-        const newNotes = [...score.notes];
-        newNotes[index] = {
-          start: note.start,
-          end: note.end,
-          pitch: note.pitch,
-        };
+        // Find closest time point <= second for start
+        let start = 0;
+        for (let i = fineTimePoints.length - 1; i >= 0; i--) {
+          if (fineTimePoints[i] <= second) {
+            start = fineTimePoints[i];
+            break;
+          }
+        }
+
+        return start;
+      },
+      []
+    );
+
+    const handleNoteClick = useCallback(
+      (index: number) => {
+        const note = score.notes[index];
+        if (note.state === "adding") {
+          // Add the note permanently by removing the "adding" state
+          const newNotes = [...score.notes];
+          newNotes[index] = {
+            start: note.start,
+            end: note.end,
+            pitch: note.pitch,
+          };
+          const updatedScore = { ...score, notes: newNotes };
+          setScore(updatedScore);
+          notifyParentOfChange(updatedScore);
+        }
+      },
+      [score, notifyParentOfChange]
+    );
+
+    const handleNoteDelete = useCallback(
+      (index: number) => {
+        // Remove the note from the score
+        const newNotes = score.notes.filter((_, i) => i !== index);
         const updatedScore = { ...score, notes: newNotes };
         setScore(updatedScore);
         notifyParentOfChange(updatedScore);
-      }
-    },
-    [score, notifyParentOfChange]
-  );
 
-  const handleNoteDelete = useCallback(
-    (index: number) => {
-      // Remove the note from the score
-      const newNotes = score.notes.filter((_, i) => i !== index);
-      const updatedScore = { ...score, notes: newNotes };
-      setScore(updatedScore);
-      notifyParentOfChange(updatedScore);
-
-      // Reset hover state to prevent stale index references
-      setHoveredNoteIndex(null);
-    },
-    [score, notifyParentOfChange]
-  );
-
-  const handleDescriptionChange = useCallback(
-    (newDescription: string) => {
-      const updatedScore = { ...score, description: newDescription };
-      setScore(updatedScore);
-      notifyParentOfChange(updatedScore);
-    },
-    [score, notifyParentOfChange]
-  );
-
-  const {
-    measures,
-    beats,
-    gridHeight,
-    gridWidth,
-    secondToX,
-    pitchToY,
-    minPitch,
-    maxPitch,
-  } = useMemo(() => {
-    const highestNoteEnd =
-      isEditMode || score.notes.length === 0
-        ? 5
-        : Math.max(...score.notes.map((note) => note.end));
-
-    // Fix: Use the VERY LAST measure (ceiling of highest note end)
-    const lastMeasure = Math.ceil(highestNoteEnd);
-    const measures = Array.from(
-      { length: lastMeasure + 1 },
-      (_, index) => index
-    );
-    const allBeats = Array.from(
-      { length: lastMeasure * 4 },
-      (_, index) => index / 4
+        // Reset hover state to prevent stale index references
+        setHoveredNoteIndex(null);
+      },
+      [score, notifyParentOfChange]
     );
 
-    // Strip measures from beats via Set operations
-    const measuresSet = new Set(measures);
-    const beats = allBeats
-      .filter((beat) => !measuresSet.has(beat))
-      .sort((a, b) => a - b);
+    const handleDescriptionChange = useCallback(
+      (newDescription: string) => {
+        const updatedScore = { ...score, description: newDescription };
+        setScore(updatedScore);
+        notifyParentOfChange(updatedScore);
+      },
+      [score, notifyParentOfChange]
+    );
 
-    // Calculate dynamic dimensions - use hardcoded values when editing, calculated when not
-    const minPitch =
-      isEditMode || score.notes.length === 0
-        ? 36 + score.tonic
-        : Math.min(...score.notes.map((note) => note.pitch));
-    const maxPitch =
-      isEditMode || score.notes.length === 0
-        ? 84 + score.tonic
-        : Math.max(...score.notes.map((note) => note.pitch));
-    const gridHeight =
-      (maxPitch - minPitch) * PITCH_DISTANCE + NOTE_HEIGHT + HEADER_HEIGHT;
-    const gridWidth = lastMeasure * PX_PER_SECOND; // Use lastMeasure instead of highestNoteEnd
-
-    // Create functions
-    const secondToX = (second: number) => second * PX_PER_SECOND;
-
-    // pitchToY: minPitch gets maxY (container height), higher pitches get lower Y values
-    const pitchToY = (pitch: number) => {
-      return HEADER_HEIGHT + (maxPitch - pitch) * PITCH_DISTANCE;
-    };
-
-    return {
+    const {
       measures,
       beats,
       gridHeight,
@@ -502,329 +481,388 @@ const NoteEditor = ({
       pitchToY,
       minPitch,
       maxPitch,
-    };
-  }, [score, isEditMode]);
+    } = useMemo(() => {
+      const highestNoteEnd =
+        isEditMode || score.notes.length === 0
+          ? 5
+          : Math.max(...score.notes.map((note) => note.end));
 
-  // Helper function to extract and quantize mouse coordinates
-  const quantizeMouseToMusic = useCallback(
-    (e: React.MouseEvent, targetElement: HTMLElement) => {
-      const rect = targetElement.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      // Fix: Use the VERY LAST measure (ceiling of highest note end)
+      const lastMeasure = Math.ceil(highestNoteEnd);
+      const measures = Array.from(
+        { length: lastMeasure + 1 },
+        (_, index) => index
+      );
+      const allBeats = Array.from(
+        { length: lastMeasure * 4 },
+        (_, index) => index / 4
+      );
 
-      const start = quantizeXFine(x, measures, beats);
-      const end = start + EIGHTH_NOTE_DURATION;
-      const pitch = quantizeY(y, pitchToY, minPitch, maxPitch, score.tonic);
+      // Strip measures from beats via Set operations
+      const measuresSet = new Set(measures);
+      const beats = allBeats
+        .filter((beat) => !measuresSet.has(beat))
+        .sort((a, b) => a - b);
 
-      return { start, end, pitch, x, y };
-    },
-    [
-      quantizeXFine,
-      measures,
-      beats,
-      quantizeY,
-      pitchToY,
-      minPitch,
-      maxPitch,
-      score.tonic,
-    ]
-  );
+      // Calculate dynamic dimensions - use hardcoded values when editing, calculated when not
+      const minPitch =
+        isEditMode || score.notes.length === 0
+          ? 36 + score.tonic
+          : Math.min(...score.notes.map((note) => note.pitch));
+      const maxPitch =
+        isEditMode || score.notes.length === 0
+          ? 84 + score.tonic
+          : Math.max(...score.notes.map((note) => note.pitch));
+      const gridHeight =
+        (maxPitch - minPitch) * PITCH_DISTANCE + NOTE_HEIGHT + HEADER_HEIGHT;
+      const gridWidth = lastMeasure * PX_PER_SECOND; // Use lastMeasure instead of highestNoteEnd
 
-  return (
-    <div style={{ marginBottom: "100px" }}>
-      {/* Four-column layout: Description + Play Button + Grid + Edit Button */}
-      <div style={{ display: "flex", gap: "0px" }}>
-        {/* Description column - 25em fixed */}
-        <div
-          style={{
-            width: "25em",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          {isEditMode ? (
-            <textarea
-              value={score.description}
-              onChange={(e) => handleDescriptionChange(e.target.value)}
-              style={{
-                width: "100%",
-                height: "100px",
-                backgroundColor: "#333",
-                color: "#fff",
-                border: "1px solid #666",
-                borderRadius: "4px",
-                padding: "8px",
-                fontSize: "14px",
-                resize: "vertical",
-              }}
-              placeholder="Enter description..."
-            />
-          ) : (
-            <div
-              style={{
-                color: "#fff",
-                fontSize: "16px",
-                lineHeight: "1.4",
-                wordWrap: "break-word",
-              }}
-            >
-              {score.description}
-            </div>
-          )}
-        </div>
+      // Create functions
+      const secondToX = (second: number) => second * PX_PER_SECOND;
 
-        {/* Play button column - shrink to content, full height */}
-        <div
-          style={{
-            flex: 0,
-            display: "flex",
-          }}
-        >
-          <button
-            onClick={() => (isPlaying ? stop() : play(score, editorId))}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "8px 18px",
-              backgroundColor: "transparent",
-              color: "#888",
-              border: "none",
-              cursor: "pointer",
-              transition: "color 0.2s ease",
-              height: "100%",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#888";
-            }}
-          >
-            {isPlaying ? <Square size={20} /> : <Play size={20} />}
-          </button>
-        </div>
+      // pitchToY: minPitch gets maxY (container height), higher pitches get lower Y values
+      const pitchToY = (pitch: number) => {
+        return HEADER_HEIGHT + (maxPitch - pitch) * PITCH_DISTANCE;
+      };
 
-        {/* Grid column - takes remaining space */}
-        <div style={{ flex: 1 }}>
+      return {
+        measures,
+        beats,
+        gridHeight,
+        gridWidth,
+        secondToX,
+        pitchToY,
+        minPitch,
+        maxPitch,
+      };
+    }, [score, isEditMode]);
+
+    // Helper function to extract and quantize mouse coordinates
+    const quantizeMouseToMusic = useCallback(
+      (e: React.MouseEvent, targetElement: HTMLElement) => {
+        const rect = targetElement.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const start = quantizeXFine(x, measures, beats);
+        const end = start + EIGHTH_NOTE_DURATION;
+        const pitch = quantizeY(y, pitchToY, minPitch, maxPitch, score.tonic);
+
+        return { start, end, pitch, x, y };
+      },
+      [
+        quantizeXFine,
+        measures,
+        beats,
+        quantizeY,
+        pitchToY,
+        minPitch,
+        maxPitch,
+        score.tonic,
+      ]
+    );
+
+    return (
+      <div style={{ marginBottom: "100px" }}>
+        {/* Four-column layout: Description + Play Button + Grid + Edit Button */}
+        <div style={{ display: "flex", gap: "0px" }}>
+          {/* Description column - 25em fixed */}
           <div
             style={{
-              width: `${gridWidth}px`,
-              height: `${gridHeight}px`,
-              position: "relative",
+              width: "25em",
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
             }}
           >
-            <Grid
-              measures={measures}
-              beats={beats}
-              secondToX={secondToX}
-              gridHeight={gridHeight}
-              gridWidth={gridWidth}
-              score={score}
-              pitchToY={pitchToY}
-              minPitch={minPitch}
-              maxPitch={maxPitch}
-            />
-
-            {/* Hover overlay for edit mode */}
-            {isEditMode && (
+            {isEditMode ? (
+              <textarea
+                value={score.description}
+                onChange={(e) => handleDescriptionChange(e.target.value)}
+                style={{
+                  width: "100%",
+                  height: "100px",
+                  backgroundColor: "#333",
+                  color: "#fff",
+                  border: "1px solid #666",
+                  borderRadius: "4px",
+                  padding: "8px",
+                  fontSize: "14px",
+                  resize: "vertical",
+                }}
+                placeholder="Enter description..."
+              />
+            ) : (
               <div
                 style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: `${gridWidth}px`,
-                  height: `${gridHeight}px`,
-                  zIndex: 3,
-                  cursor: isDragging ? "ew-resize" : "crosshair",
+                  color: "#fff",
+                  fontSize: "16px",
+                  lineHeight: "1.4",
+                  wordWrap: "break-word",
                 }}
-                onMouseDown={(e) => {
-                  const { start, end, pitch } = quantizeMouseToMusic(
-                    e,
-                    e.currentTarget
-                  );
+              >
+                {score.description}
+              </div>
+            )}
+          </div>
 
-                  // Start dragging - create initial note with fixed pitch and start
-                  const initialNote: Note = {
-                    start,
-                    end,
-                    pitch,
-                    state: "adding",
-                  };
+          {/* Play button column - shrink to content, full height */}
+          <div
+            style={{
+              flex: 0,
+              display: "flex",
+            }}
+          >
+            <button
+              onClick={() => (isPlaying ? stop() : play(score, editorId))}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "8px 18px",
+                backgroundColor: "transparent",
+                color: "#888",
+                border: "none",
+                cursor: "pointer",
+                transition: "color 0.2s ease",
+                height: "100%",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#fff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#888";
+              }}
+            >
+              {isPlaying ? <Square size={20} /> : <Play size={20} />}
+            </button>
+          </div>
 
-                  setIsDragging(true);
-                  setDragNote(initialNote);
-                  setHoverNote(null);
-                }}
-                onMouseMove={(e) => {
-                  if (isDragging && dragNote) {
-                    // During drag: only update end position with fine quantization
-                    const { end: newEnd } = quantizeMouseToMusic(
-                      e,
-                      e.currentTarget
-                    );
+          {/* Grid column - takes remaining space */}
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                width: `${gridWidth}px`,
+                height: `${gridHeight}px`,
+                position: "relative",
+              }}
+            >
+              <Grid
+                measures={measures}
+                beats={beats}
+                secondToX={secondToX}
+                gridHeight={gridHeight}
+                gridWidth={gridWidth}
+                score={score}
+                pitchToY={pitchToY}
+                minPitch={minPitch}
+                maxPitch={maxPitch}
+              />
 
-                    // Ensure end is not before start
-                    const finalEnd = Math.max(newEnd, dragNote.start + 0.0625); // Minimum 16th note length
-
-                    const updatedDragNote: Note = {
-                      ...dragNote,
-                      end: finalEnd,
-                    };
-                    setDragNote(updatedDragNote);
-                  } else {
-                    // Normal hover behavior when not dragging
+              {/* Hover overlay for edit mode */}
+              {isEditMode && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: `${gridWidth}px`,
+                    height: `${gridHeight}px`,
+                    zIndex: 3,
+                    cursor: isDragging ? "ew-resize" : "crosshair",
+                  }}
+                  onMouseDown={(e) => {
                     const { start, end, pitch } = quantizeMouseToMusic(
                       e,
                       e.currentTarget
                     );
 
-                    // Only update if the note properties have actually changed
-                    if (
-                      !hoverNote ||
-                      hoverNote.start !== start ||
-                      hoverNote.end !== end ||
-                      hoverNote.pitch !== pitch
-                    ) {
-                      const newHoverNote: Note = {
-                        start,
-                        end,
-                        pitch,
-                        state: "adding",
+                    // Start dragging - create initial note with fixed pitch and start
+                    const initialNote: Note = {
+                      start,
+                      end,
+                      pitch,
+                      state: "adding",
+                    };
+
+                    setIsDragging(true);
+                    setDragNote(initialNote);
+                    setHoverNote(null);
+                  }}
+                  onMouseMove={(e) => {
+                    if (isDragging && dragNote) {
+                      // During drag: only update end position with fine quantization
+                      const { end: newEnd } = quantizeMouseToMusic(
+                        e,
+                        e.currentTarget
+                      );
+
+                      // Ensure end is not before start
+                      const finalEnd = Math.max(
+                        newEnd,
+                        dragNote.start + 0.0625
+                      ); // Minimum 16th note length
+
+                      const updatedDragNote: Note = {
+                        ...dragNote,
+                        end: finalEnd,
                       };
-                      setHoverNote(newHoverNote);
+                      setDragNote(updatedDragNote);
+                    } else {
+                      // Normal hover behavior when not dragging
+                      const { start, end, pitch } = quantizeMouseToMusic(
+                        e,
+                        e.currentTarget
+                      );
+
+                      // Only update if the note properties have actually changed
+                      if (
+                        !hoverNote ||
+                        hoverNote.start !== start ||
+                        hoverNote.end !== end ||
+                        hoverNote.pitch !== pitch
+                      ) {
+                        const newHoverNote: Note = {
+                          start,
+                          end,
+                          pitch,
+                          state: "adding",
+                        };
+                        setHoverNote(newHoverNote);
+                      }
                     }
-                  }
-                }}
-                onMouseUp={() => {
-                  if (isDragging && dragNote) {
-                    // Finalize the note - add it to the score
-                    const newNotes = [
-                      ...score.notes,
-                      {
-                        start: dragNote.start,
-                        end: dragNote.end,
-                        pitch: dragNote.pitch,
-                      },
-                    ];
-                    const updatedScore = { ...score, notes: newNotes };
-                    setScore(updatedScore);
-                    notifyParentOfChange(updatedScore);
+                  }}
+                  onMouseUp={() => {
+                    if (isDragging && dragNote) {
+                      // Finalize the note - add it to the score
+                      const newNotes = [
+                        ...score.notes,
+                        {
+                          start: dragNote.start,
+                          end: dragNote.end,
+                          pitch: dragNote.pitch,
+                        },
+                      ];
+                      const updatedScore = { ...score, notes: newNotes };
+                      setScore(updatedScore);
+                      notifyParentOfChange(updatedScore);
 
-                    // Reset drag state
-                    setIsDragging(false);
-                    setDragNote(null);
-                    setHoverNote(null);
-                  }
+                      // Reset drag state
+                      setIsDragging(false);
+                      setDragNote(null);
+                      setHoverNote(null);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (!isDragging) {
+                      setHoverNote(null);
+                    }
+                  }}
+                />
+              )}
+
+              <RenderedNotes
+                score={{
+                  ...score,
+                  notes: dragNote
+                    ? [...score.notes, dragNote]
+                    : hoverNote
+                    ? [...score.notes, hoverNote]
+                    : score.notes,
                 }}
-                onMouseLeave={() => {
-                  if (!isDragging) {
-                    setHoverNote(null);
-                  }
-                }}
+                secondToX={secondToX}
+                pitchToY={pitchToY}
+                playingNotes={playingNotes}
+                individuallyPlayingNotes={individuallyPlayingNotes}
+                onNoteClick={handleNoteClick}
+                isEditMode={isEditMode}
+                playNote={playNote}
+                onNoteDelete={handleNoteDelete}
+                hoveredNoteIndex={hoveredNoteIndex}
+                onNoteHover={setHoveredNoteIndex}
+                editorId={editorId}
               />
-            )}
+            </div>
+          </div>
 
-            <RenderedNotes
-              score={{
-                ...score,
-                notes: dragNote
-                  ? [...score.notes, dragNote]
-                  : hoverNote
-                  ? [...score.notes, hoverNote]
-                  : score.notes,
+          {/* Edit button column - shrink to content, full height */}
+          <div
+            style={{
+              flex: 0,
+              display: "flex",
+            }}
+          >
+            <button
+              onClick={() => setIsEditMode(!isEditMode)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "8px 18px",
+                backgroundColor: isEditMode ? "#fff" : "transparent",
+                color: isEditMode ? "#000" : "#888",
+                border: "none",
+                cursor: "pointer",
+                borderRadius: "4px",
+                transition: "all 0.2s ease",
+                height: "100%",
               }}
-              secondToX={secondToX}
-              pitchToY={pitchToY}
-              playingNotes={playingNotes}
-              individuallyPlayingNotes={individuallyPlayingNotes}
-              onNoteClick={handleNoteClick}
-              isEditMode={isEditMode}
-              playNote={playNote}
-              onNoteDelete={handleNoteDelete}
-              hoveredNoteIndex={hoveredNoteIndex}
-              onNoteHover={setHoveredNoteIndex}
-              editorId={editorId}
-            />
+              onMouseEnter={(e) => {
+                if (isEditMode) {
+                  e.currentTarget.style.backgroundColor = "#ccc";
+                  e.currentTarget.style.color = "#000";
+                } else {
+                  e.currentTarget.style.color = "#fff";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (isEditMode) {
+                  e.currentTarget.style.backgroundColor = "#fff";
+                  e.currentTarget.style.color = "#000";
+                } else {
+                  e.currentTarget.style.color = "#888";
+                }
+              }}
+            >
+              <Pencil size={20} />
+            </button>
           </div>
         </div>
 
-        {/* Edit button column - shrink to content, full height */}
-        <div
-          style={{
-            flex: 0,
-            display: "flex",
-          }}
-        >
-          <button
-            onClick={() => setIsEditMode(!isEditMode)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "8px 18px",
-              backgroundColor: isEditMode ? "#fff" : "transparent",
-              color: isEditMode ? "#000" : "#888",
-              border: "none",
-              cursor: "pointer",
-              borderRadius: "4px",
-              transition: "all 0.2s ease",
-              height: "100%",
-            }}
-            onMouseEnter={(e) => {
-              if (isEditMode) {
-                e.currentTarget.style.backgroundColor = "#ccc";
-                e.currentTarget.style.color = "#000";
-              } else {
+        {/* Add new score button - only show in editing mode */}
+        {showEditingUI && (
+          <div style={{ marginTop: "20px", textAlign: "center" }}>
+            <button
+              onClick={onAddNewScore}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "transparent",
+                color: "#ccc",
+                border: "1px solid #666",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "14px",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
                 e.currentTarget.style.color = "#fff";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (isEditMode) {
-                e.currentTarget.style.backgroundColor = "#fff";
-                e.currentTarget.style.color = "#000";
-              } else {
-                e.currentTarget.style.color = "#888";
-              }
-            }}
-          >
-            <Pencil size={20} />
-          </button>
-        </div>
+                e.currentTarget.style.borderColor = "#999";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#ccc";
+                e.currentTarget.style.borderColor = "#666";
+              }}
+            >
+              Add a new score
+            </button>
+          </div>
+        )}
       </div>
+    );
+  }
+);
 
-      {/* Add new score button - only show in editing mode */}
-      {showEditingUI && (
-        <div style={{ marginTop: "20px", textAlign: "center" }}>
-          <button
-            onClick={onAddNewScore}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "transparent",
-              color: "#ccc",
-              border: "1px solid #666",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "14px",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#fff";
-              e.currentTarget.style.borderColor = "#999";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#ccc";
-              e.currentTarget.style.borderColor = "#666";
-            }}
-          >
-            Add a new score
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
+NoteEditor.displayName = "NoteEditor";
 
 function App() {
   // Score storage management
@@ -846,6 +884,36 @@ function App() {
 
   // Check if we should show editing UI
   const showEditingUI = shouldShowEditingUI();
+
+  // Track refs for all NoteEditor instances to handle Esc key
+  const noteEditorRefs = useRef<(NoteEditorRef | null)[]>([]);
+
+  // Initialize refs array when scores change
+  useEffect(() => {
+    noteEditorRefs.current = noteEditorRefs.current.slice(
+      0,
+      versionedScores.scores.length
+    );
+  }, [versionedScores.scores.length]);
+
+  // Handle Esc key to exit all editing modes
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        // Exit edit mode on all editors
+        noteEditorRefs.current.forEach((ref) => {
+          if (ref) {
+            ref.exitEditMode();
+          }
+        });
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   // Show loading screen while Tone.js samples are loading
   if (!samplerInitialized) {
@@ -882,6 +950,9 @@ function App() {
             }}
           >
             <NoteEditor
+              ref={(ref) => {
+                noteEditorRefs.current[index] = ref;
+              }}
               score={score}
               onScoreChange={handleScoreChange(index)}
               editorId={editorId}
