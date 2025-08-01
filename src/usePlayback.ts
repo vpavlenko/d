@@ -315,6 +315,9 @@ export const usePlayback = () => {
           }, `${realStartTime}`);
 
           // Schedule note end (both audio release and UI update)
+          // CRITICAL: Schedule releases slightly before their exact time to ensure
+          // they execute before any attacks at the same time (prevents note cutoff bug)
+          const releaseTime = Math.max(0, realEndTime - 0.001); // 1ms earlier, but never negative
           const endEventId = Tone.Transport.schedule((time) => {
             // Convert MIDI number to note name
             const noteName = Tone.Frequency(note.pitch, "midi").toNote();
@@ -332,7 +335,7 @@ export const usePlayback = () => {
               newMap.set(editorId, newSet);
               return newMap;
             });
-          }, `${realEndTime}`);
+          }, `${releaseTime}`);
 
           scheduledEventsRef.current.push(startEventId, endEventId);
         });

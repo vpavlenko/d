@@ -2765,5 +2765,5 @@ export const defaultScores: VersionedScores = {
       description: "Could he do hills all the way?",
     },
   ],
-  version: 2909,
+  version: 3000,
 };
