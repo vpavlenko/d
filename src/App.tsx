@@ -12,7 +12,6 @@ import { usePlayback } from "./usePlayback";
 import { Grid } from "./Grid";
 import type { Note, Score } from "./types";
 import { useScoreStorage } from "./scoreStorage";
-import { SplashScreen } from "./SplashScreen";
 
 // Check if we should show editing/storage UI
 const shouldShowEditingUI = (): boolean => {
@@ -880,7 +879,6 @@ function App() {
     stop,
     playNote,
     samplerInitialized,
-    loadingProgress,
   } = usePlayback();
 
   // Check if we should show editing UI
@@ -916,9 +914,28 @@ function App() {
     };
   }, []);
 
-  // Show loading screen while Tone.js samples are loading
+  // Show a simple loading screen while samples are being decoded
   if (!samplerInitialized) {
-    return <SplashScreen loadingProgress={loadingProgress} />;
+    return (
+      <div
+        style={{
+          backgroundColor: "black",
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          fontFamily: "monospace",
+          gap: "20px",
+        }}
+      >
+        <div style={{ fontSize: "28px" }}>🎹 Loading Piano Samples...</div>
+        <div style={{ fontSize: "16px", color: "#ccc" }}>
+          Decoding bundled audio files...
+        </div>
+      </div>
+    );
   }
 
   return (

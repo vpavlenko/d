@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import * as Tone from "tone";
 import type { Score } from "./types";
+import { loadPianoSamples } from "./samples";
 
 // Global BPM constant for playback tempo
 const PLAYBACK_BPM = 100;
@@ -11,24 +12,7 @@ const scoreSecondsToRealSeconds = (scoreSeconds: number): number => {
   return scoreSeconds * (REFERENCE_BPM / PLAYBACK_BPM);
 };
 
-// Types for tracking sample loading
-export interface SampleLoadingState {
-  name: string;
-  url: string;
-  status: "pending" | "loading" | "loaded" | "error";
-  error?: string;
-  startTime?: number;
-  endTime?: number;
-  size?: number;
-}
-
-export interface LoadingProgress {
-  samples: Map<string, SampleLoadingState>;
-  totalSamples: number;
-  loadedSamples: number;
-  failedSamples: number;
-  startTime: number;
-}
+// No loading progress needed - samples are bundled!
 
 // Custom hook for playback functionality
 export const usePlayback = () => {
@@ -44,70 +28,11 @@ export const usePlayback = () => {
   const individualNoteTimeoutsRef = useRef<Map<string, number>>(new Map());
   const individualNoteReleasesRef = useRef<Map<string, string>>(new Map());
   const [samplerInitialized, setSamplerInitialized] = useState(false);
-  const [loadingProgress, setLoadingProgress] =
-    useState<LoadingProgress | null>(null);
 
   // Initialize sampler immediately when hook is used
   useEffect(() => {
     const initSampler = async () => {
       if (!samplerRef.current) {
-        const startTime = Date.now();
-
-        // Sample configuration
-        const sampleUrls = {
-          A0: "A0.mp3",
-          C1: "C1.mp3",
-          "D#1": "Ds1.mp3",
-          "F#1": "Fs1.mp3",
-          A1: "A1.mp3",
-          C2: "C2.mp3",
-          "D#2": "Ds2.mp3",
-          "F#2": "Fs2.mp3",
-          A2: "A2.mp3",
-          C3: "C3.mp3",
-          "D#3": "Ds3.mp3",
-          "F#3": "Fs3.mp3",
-          A3: "A3.mp3",
-          C4: "C4.mp3",
-          "D#4": "Ds4.mp3",
-          "F#4": "Fs4.mp3",
-          A4: "A4.mp3",
-          C5: "C5.mp3",
-          "D#5": "Ds5.mp3",
-          "F#5": "Fs5.mp3",
-          A5: "A5.mp3",
-          C6: "C6.mp3",
-          "D#6": "Ds6.mp3",
-          "F#6": "Fs6.mp3",
-          A6: "A6.mp3",
-          C7: "C7.mp3",
-          "D#7": "Ds7.mp3",
-          "F#7": "Fs7.mp3",
-          A7: "A7.mp3",
-          C8: "C8.mp3",
-        };
-
-        const baseUrl = "https://tonejs.github.io/audio/salamander/";
-
-        // Initialize loading progress tracking
-        const samplesMap = new Map<string, SampleLoadingState>();
-        Object.entries(sampleUrls).forEach(([noteName, filename]) => {
-          samplesMap.set(noteName, {
-            name: noteName,
-            url: `${baseUrl}${filename}`,
-            status: "pending",
-            startTime: Date.now(),
-          });
-        });
-
-        setLoadingProgress({
-          samples: samplesMap,
-          totalSamples: Object.keys(sampleUrls).length,
-          loadedSamples: 0,
-          failedSamples: 0,
-          startTime,
-        });
-
         // Start Tone.js context
         try {
           await Tone.start();
@@ -116,113 +41,26 @@ export const usePlayback = () => {
           console.error("❌ Failed to start Tone.js:", error);
         }
 
-        // Create custom sampler with detailed progress tracking
+        // Load all piano samples as AudioBuffers (from bundled ArrayBuffers)
+        const audioBuffers = await loadPianoSamples();
+
+        if (audioBuffers.size === 0) {
+          console.error("❌ No audio samples could be loaded");
+          return;
+        }
+
+        // Create sampler with pre-loaded AudioBuffers
         const sampler = new Tone.Sampler({
-          urls: sampleUrls,
+          urls: Object.fromEntries(audioBuffers),
           release: 1,
-          baseUrl,
           onload: () => {
             console.log("✅ All samples loaded successfully");
             setSamplerInitialized(true);
-            setLoadingProgress((prev) =>
-              prev ? { ...prev, endTime: Date.now() } : null
-            );
           },
           onerror: (error) => {
             console.error("❌ Sampler loading error:", error);
           },
         }).toDestination();
-
-        // Track individual sample loading using fetch requests before Tone.js loads them
-        const trackSampleLoading = async () => {
-          // Pre-load tracking by making HEAD requests to each sample URL
-          const loadPromises = Object.entries(sampleUrls).map(
-            async ([noteName, filename]) => {
-              const fullUrl = `${baseUrl}${filename}`;
-              const sample = samplesMap.get(noteName);
-
-              if (!sample) return;
-
-              // Update status to loading
-              setLoadingProgress((prev) => {
-                if (!prev) return null;
-                const newSamples = new Map(prev.samples);
-                newSamples.set(noteName, {
-                  ...sample,
-                  status: "loading",
-                  startTime: Date.now(),
-                });
-                return { ...prev, samples: newSamples };
-              });
-
-              try {
-                // Make a HEAD request to check if the file exists and get size info
-                const response = await fetch(fullUrl, { method: "HEAD" });
-
-                if (response.ok) {
-                  const contentLength = response.headers.get("content-length");
-
-                  setLoadingProgress((prev) => {
-                    if (!prev) return null;
-                    const newSamples = new Map(prev.samples);
-                    const currentSample = newSamples.get(noteName);
-                    if (currentSample) {
-                      newSamples.set(noteName, {
-                        ...currentSample,
-                        status: "loaded",
-                        endTime: Date.now(),
-                        size: contentLength
-                          ? parseInt(contentLength)
-                          : undefined,
-                      });
-                    }
-                    return {
-                      ...prev,
-                      samples: newSamples,
-                      loadedSamples: prev.loadedSamples + 1,
-                    };
-                  });
-                  console.log(`✅ Verified sample: ${noteName} (${fullUrl})`);
-                } else {
-                  throw new Error(
-                    `HTTP ${response.status}: ${response.statusText}`
-                  );
-                }
-              } catch (error: unknown) {
-                const errorMessage =
-                  error instanceof Error ? error.message : "Failed to load";
-                setLoadingProgress((prev) => {
-                  if (!prev) return null;
-                  const newSamples = new Map(prev.samples);
-                  const currentSample = newSamples.get(noteName);
-                  if (currentSample) {
-                    newSamples.set(noteName, {
-                      ...currentSample,
-                      status: "error",
-                      endTime: Date.now(),
-                      error: errorMessage,
-                    });
-                  }
-                  return {
-                    ...prev,
-                    samples: newSamples,
-                    failedSamples: prev.failedSamples + 1,
-                  };
-                });
-                console.error(
-                  `❌ Failed to verify sample: ${noteName} (${fullUrl})`,
-                  error
-                );
-              }
-            }
-          );
-
-          // Wait for all sample checks to complete
-          await Promise.allSettled(loadPromises);
-        };
-
-        // Start tracking in parallel with Tone.js loading
-        trackSampleLoading();
 
         samplerRef.current = sampler;
       }
@@ -564,6 +402,5 @@ export const usePlayback = () => {
     stop,
     playNote,
     samplerInitialized,
-    loadingProgress,
   };
 };
