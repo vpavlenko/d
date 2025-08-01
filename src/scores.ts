@@ -1731,6 +1731,73 @@ export const defaultScores: VersionedScores = {
       notes: [
         {
           start: 1,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 1.0625,
+          end: 2,
+          pitch: 61,
+        },
+        {
+          start: 2.0625,
+          end: 3,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 2.125,
+          end: 3,
+          pitch: 64,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 3.0625,
+          end: 4,
+          pitch: 52,
+        },
+        {
+          start: 3.125,
+          end: 4,
+          pitch: 61,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 4.0625,
+          end: 5,
+          pitch: 59,
+        },
+        {
+          start: 4.125,
+          end: 5,
+          pitch: 68,
+        },
+        {
+          start: 1.125,
+          end: 2,
+          pitch: 69,
+        },
+      ],
+      tonic: 9,
+      description:
+        "So it's like a 6m 4sus2 1 5 progression, if we use Nashville Numbers",
+    },
+    {
+      notes: [
+        {
+          start: 1,
           end: 1.25,
           pitch: 54,
         },
@@ -3082,6 +3149,159 @@ export const defaultScores: VersionedScores = {
       tonic: 9,
       description: "Instead, Yiruma added fills between main 1 notes",
     },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.5,
+          end: 2,
+          pitch: 66,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 80,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 81,
+        },
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 81,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 80,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 81,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 76,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 81,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 2.75,
+          end: 4.5,
+          pitch: 74,
+        },
+      ],
+      tonic: 9,
+      description: "Now, let's see the intro. The melody gets its first seeds",
+    },
+    {
+      notes: [
+        {
+          start: 1.5,
+          end: 2,
+          pitch: 66,
+        },
+        {
+          start: 1,
+          end: 1.5,
+          pitch: 81,
+        },
+        {
+          start: 1.5,
+          end: 2,
+          pitch: 81,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 80,
+        },
+        {
+          start: 1.25,
+          end: 2,
+          pitch: 61,
+        },
+        {
+          start: 1,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2,
+          end: 4.5,
+          pitch: 50,
+        },
+        {
+          start: 2.25,
+          end: 4.5,
+          pitch: 57,
+        },
+        {
+          start: 2.5,
+          end: 4.5,
+          pitch: 64,
+        },
+        {
+          start: 2,
+          end: 2.5,
+          pitch: 81,
+        },
+        {
+          start: 2.5,
+          end: 4.5,
+          pitch: 81,
+        },
+        {
+          start: 2.75,
+          end: 4.5,
+          pitch: 74,
+        },
+        {
+          start: 2.25,
+          end: 4.5,
+          pitch: 76,
+        },
+        {
+          start: 1.25,
+          end: 1.75,
+          pitch: 80,
+        },
+      ],
+      tonic: 9,
+      description:
+        "Yiruma sustains notes with a pedal till the end of every measure, so the actual sound is more like this. As the drawn out sustained notes are harder to read, we'll use the shorter ones",
+    },
   ],
-  version: 3355,
+  version: 4138,
 };
