@@ -236,6 +236,244 @@ export const defaultScores: VersionedScores = {
     {
       notes: [
         {
+          start: 0.5,
+          end: 0.625,
+          pitch: 81,
+        },
+        {
+          start: 0.625,
+          end: 0.75,
+          pitch: 83,
+        },
+        {
+          start: 0.75,
+          end: 0.875,
+          pitch: 81,
+        },
+        {
+          start: 0.875,
+          end: 1,
+          pitch: 80,
+        },
+        {
+          start: 1,
+          end: 1.125,
+          pitch: 81,
+        },
+        {
+          start: 1.125,
+          end: 1.25,
+          pitch: 69,
+        },
+        {
+          start: 1.25,
+          end: 1.375,
+          pitch: 76,
+        },
+        {
+          start: 1.375,
+          end: 1.5,
+          pitch: 69,
+        },
+        {
+          start: 1.5,
+          end: 1.625,
+          pitch: 81,
+        },
+        {
+          start: 1.625,
+          end: 1.75,
+          pitch: 83,
+        },
+        {
+          start: 1.75,
+          end: 1.875,
+          pitch: 81,
+        },
+        {
+          start: 1.875,
+          end: 2,
+          pitch: 80,
+        },
+        {
+          start: 2,
+          end: 2.125,
+          pitch: 81,
+        },
+        {
+          start: 2.125,
+          end: 2.25,
+          pitch: 69,
+        },
+        {
+          start: 2.25,
+          end: 2.375,
+          pitch: 76,
+        },
+        {
+          start: 2.375,
+          end: 2.5,
+          pitch: 69,
+        },
+        {
+          start: 2.5,
+          end: 2.625,
+          pitch: 81,
+        },
+        {
+          start: 2.625,
+          end: 2.75,
+          pitch: 83,
+        },
+        {
+          start: 2.75,
+          end: 2.875,
+          pitch: 81,
+        },
+        {
+          start: 2.875,
+          end: 3,
+          pitch: 80,
+        },
+        {
+          start: 3,
+          end: 3.125,
+          pitch: 81,
+        },
+        {
+          start: 3.125,
+          end: 3.25,
+          pitch: 83,
+        },
+        {
+          start: 3.25,
+          end: 3.375,
+          pitch: 85,
+        },
+        {
+          start: 3.375,
+          end: 3.5,
+          pitch: 86,
+        },
+        {
+          start: 3.5,
+          end: 3.625,
+          pitch: 88,
+        },
+        {
+          start: 3.625,
+          end: 3.75,
+          pitch: 85,
+        },
+        {
+          start: 3.75,
+          end: 3.875,
+          pitch: 83,
+        },
+        {
+          start: 3.875,
+          end: 4,
+          pitch: 81,
+        },
+        {
+          start: 4,
+          end: 4.5,
+          pitch: 80,
+        },
+      ],
+      tonic: 9,
+      description:
+        "It has two parts. One is the melody, played by the right hand",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+      ],
+      tonic: 9,
+      description: "The other part is the chords, played by the left hand",
+    },
+    {
+      notes: [
+        {
           start: 1,
           end: 2,
           pitch: 54,
@@ -257,7 +495,8 @@ export const defaultScores: VersionedScores = {
         },
       ],
       tonic: 9,
-      description: "Let's start with the bass line",
+      description:
+        "Let's start with the bass line onto which the chords are built",
     },
     {
       notes: [
@@ -528,6 +767,172 @@ export const defaultScores: VersionedScores = {
       description:
         'For this piece we use the "A major scale": seven colors which go in specific intervals from the main note A = 1',
     },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.125,
+          end: 1.25,
+          pitch: 56,
+        },
+        {
+          start: 1.25,
+          end: 1.375,
+          pitch: 57,
+        },
+        {
+          start: 1.375,
+          end: 1.5,
+          pitch: 59,
+        },
+        {
+          start: 1.5,
+          end: 1.625,
+          pitch: 61,
+        },
+        {
+          start: 1.625,
+          end: 1.75,
+          pitch: 62,
+        },
+        {
+          start: 1.75,
+          end: 1.875,
+          pitch: 64,
+        },
+        {
+          start: 1.875,
+          end: 2,
+          pitch: 66,
+        },
+        {
+          start: 2.125,
+          end: 2.25,
+          pitch: 52,
+        },
+        {
+          start: 2.25,
+          end: 2.375,
+          pitch: 54,
+        },
+        {
+          start: 2.375,
+          end: 2.5,
+          pitch: 56,
+        },
+        {
+          start: 2.5,
+          end: 2.625,
+          pitch: 57,
+        },
+        {
+          start: 2.625,
+          end: 2.75,
+          pitch: 59,
+        },
+        {
+          start: 2.75,
+          end: 2.875,
+          pitch: 61,
+        },
+        {
+          start: 2.875,
+          end: 3,
+          pitch: 62,
+        },
+        {
+          start: 3.125,
+          end: 3.25,
+          pitch: 47,
+        },
+        {
+          start: 3.25,
+          end: 3.375,
+          pitch: 49,
+        },
+        {
+          start: 3.375,
+          end: 3.5,
+          pitch: 50,
+        },
+        {
+          start: 3.5,
+          end: 3.625,
+          pitch: 52,
+        },
+        {
+          start: 3.625,
+          end: 3.75,
+          pitch: 54,
+        },
+        {
+          start: 3.75,
+          end: 3.875,
+          pitch: 56,
+        },
+        {
+          start: 3.875,
+          end: 4,
+          pitch: 57,
+        },
+        {
+          start: 4.125,
+          end: 4.25,
+          pitch: 54,
+        },
+        {
+          start: 4.25,
+          end: 4.375,
+          pitch: 56,
+        },
+        {
+          start: 4.375,
+          end: 4.5,
+          pitch: 57,
+        },
+        {
+          start: 4.5,
+          end: 4.625,
+          pitch: 59,
+        },
+        {
+          start: 4.625,
+          end: 4.75,
+          pitch: 61,
+        },
+        {
+          start: 4.75,
+          end: 4.875,
+          pitch: 62,
+        },
+        {
+          start: 4.875,
+          end: 5,
+          pitch: 64,
+        },
+      ],
+      tonic: 9,
+      description: "We can also play the scale from the bass note",
+    },
   ],
-  version: 538,
+  version: 856,
 };

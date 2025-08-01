@@ -35,6 +35,7 @@ export const saveScoresToStorage = (versionedScores: VersionedScores): void => {
 interface ScoreStorageHook {
   versionedScores: VersionedScores;
   handleScoreChange: (index: number) => (updatedScore: Score) => void;
+  addNewScore: (sourceScore: Score, insertIndex: number) => void;
   ScoreStorageUI: React.FC;
 }
 
@@ -94,6 +95,34 @@ export const useScoreStorage = (): ScoreStorageHook => {
     },
     [scoresOrigin, hasChanges]
   );
+
+  const addNewScore = useCallback((sourceScore: Score, insertIndex: number) => {
+    // Create a new score by copying the source score
+    const newScore: Score = {
+      notes: [...sourceScore.notes], // Deep copy the notes array
+      tonic: sourceScore.tonic,
+      description: "A new copy",
+    };
+
+    setVersionedScores((prev) => {
+      const newScores = [...prev.scores];
+      newScores.splice(insertIndex + 1, 0, newScore); // Insert after the source score
+
+      const updated = {
+        ...prev,
+        scores: newScores,
+        version: prev.version + 1,
+      };
+
+      // Save to localStorage
+      saveScoresToStorage(updated);
+      return updated;
+    });
+
+    // Update state flags
+    setHasChanges(true);
+    setScoresOrigin("localStorage");
+  }, []);
 
   const copyScoresAsJson = useCallback(async () => {
     try {
@@ -177,6 +206,7 @@ export const useScoreStorage = (): ScoreStorageHook => {
   return {
     versionedScores,
     handleScoreChange,
+    addNewScore,
     ScoreStorageUI,
   };
 };

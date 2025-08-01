@@ -22,7 +22,7 @@ const COLORS = [
 
 export const PX_PER_SECOND = 200;
 export const EIGHTH_NOTE_DURATION = 0.125; // 1/8th note in seconds
-export const PITCH_DISTANCE = 10;
+export const PITCH_DISTANCE = 7;
 export const NOTE_HEIGHT = 2 * PITCH_DISTANCE;
 export const HEADER_HEIGHT = 20;
 
@@ -217,7 +217,7 @@ const RenderedNotes = ({
                 alignItems: "center",
                 justifyContent: "center",
                 color: textColor,
-                fontSize: "14px",
+                fontSize: `${NOTE_HEIGHT - 2}px`,
                 fontWeight: "bold",
                 fontFamily: "monospace",
                 boxShadow: haloEffect,
@@ -246,6 +246,7 @@ const NoteEditor = ({
   play,
   stop,
   playNote,
+  onAddNewScore,
 }: {
   score: Score;
   onScoreChange: (score: Score) => void;
@@ -255,6 +256,7 @@ const NoteEditor = ({
   play: (score: Score, editorId: string) => Promise<void>;
   stop: () => void;
   playNote: (pitch: number, duration?: number) => void;
+  onAddNewScore: () => void;
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [score, setScore] = useState(initialScore);
@@ -727,13 +729,41 @@ const NoteEditor = ({
           )}
         </div>
       </div>
+
+      {/* Add new score button */}
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+        <button
+          onClick={onAddNewScore}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "transparent",
+            color: "#ccc",
+            border: "1px solid #666",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontFamily: "Arial, sans-serif",
+            fontSize: "14px",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#fff";
+            e.currentTarget.style.borderColor = "#999";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "#ccc";
+            e.currentTarget.style.borderColor = "#666";
+          }}
+        >
+          Add a new score
+        </button>
+      </div>
     </div>
   );
 };
 
 function App() {
   // Score storage management
-  const { versionedScores, handleScoreChange, ScoreStorageUI } =
+  const { versionedScores, handleScoreChange, addNewScore, ScoreStorageUI } =
     useScoreStorage();
 
   // Global playback system - singleton for all NoteEditors
@@ -779,6 +809,7 @@ function App() {
               play={play}
               stop={stop}
               playNote={playNote}
+              onAddNewScore={() => addNewScore(score, index)}
             />
           </div>
         );
