@@ -12,7 +12,7 @@ import { usePlayback } from "./usePlayback";
 import { Grid } from "./Grid";
 import type { Note, Score } from "./types";
 import { useScoreStorage } from "./scoreStorage";
-import { RenderedNotes, NOTE_HEIGHT } from "./RenderedNotes";
+import { RenderedNotes, NOTE_HEIGHT, PITCH_DISTANCE } from "./RenderedNotes";
 
 // Check if we should show editing/storage UI
 const shouldShowEditingUI = (): boolean => {
@@ -33,7 +33,6 @@ const shouldShowEditingUI = (): boolean => {
 export const MIN_PX_PER_SECOND = 100;
 export const MAX_PX_PER_SECOND = 200;
 export const EIGHTH_NOTE_DURATION = 0.125; // 1/8th note in seconds
-export const PITCH_DISTANCE = 6;
 export const HEADER_HEIGHT = 15;
 
 // Layout constants

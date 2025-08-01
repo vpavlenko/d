@@ -16,7 +16,8 @@ const COLORS = [
   "#ffff00",
 ];
 
-export const NOTE_HEIGHT = 12; // 2 * PITCH_DISTANCE where PITCH_DISTANCE = 6
+export const PITCH_DISTANCE = 6;
+export const NOTE_HEIGHT = PITCH_DISTANCE * 2;
 
 // Scale degree mapping array
 const SCALE_DEGREES = [

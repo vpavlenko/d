@@ -72,7 +72,7 @@ const MeasuresGrid = ({
   return (
     <>
       {/* Measure bars */}
-      {measures.map((measure) => (
+      {measures.slice(1).map((measure, index) => (
         <div
           key={`measure-${measure}`}
           style={{
@@ -81,7 +81,7 @@ const MeasuresGrid = ({
             top: 0,
             width: 0,
             height: `${gridHeight}px`,
-            border: "0.5px solid #999",
+            border: `0.5px solid ${[0, 4].includes(index) ? "#fff" : "#666"}`,
             zIndex: 1,
           }}
         />
@@ -104,7 +104,7 @@ const MeasuresGrid = ({
       ))}
 
       {/* Measure numbers */}
-      {measures.slice(0, -1).map((measure) => (
+      {measures.slice(1, -1).map((measure) => (
         <div
           key={`measure-number-${measure}`}
           style={{
