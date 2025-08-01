@@ -65,6 +65,27 @@ const SCALE_DEGREES = [
   "7",
 ];
 
+// Letter name mapping for pitch classes (using flats/sharps consistent with scale degrees)
+const PITCH_CLASS_NAMES = [
+  "C", // 0
+  "D♭", // 1
+  "D", // 2
+  "E♭", // 3
+  "E", // 4
+  "F", // 5
+  "F♯", // 6
+  "G", // 7
+  "A♭", // 8
+  "A", // 9
+  "B♭", // 10
+  "B", // 11
+];
+
+// Function to get letter name from pitch class
+const getPitchClassName = (pitchClass: number): string => {
+  return PITCH_CLASS_NAMES[((pitchClass % 12) + 12) % 12];
+};
+
 // Function to get scale degree from pitch and tonic
 const getScaleDegree = (pitch: number, tonic: number): string => {
   const scaleDegreeIndex = ((pitch % 12) + 12 - tonic) % 12;
@@ -101,12 +122,45 @@ const RenderedNotes = ({
   hoveredNoteIndex?: number | null;
   onNoteHover: (index: number | null) => void;
 }) => {
+  // Find the index of the leftmost (earliest start time) scale degree 1 note,
+  // with lowest pitch as tiebreaker
+  const firstTonicIndex = useMemo(() => {
+    const tonicNotes = score.notes
+      .map((note, index) => ({ note, index }))
+      .filter(({ note }) => {
+        const scaleDegree = getScaleDegree(note.pitch, score.tonic);
+        return scaleDegree === "1";
+      });
+
+    if (tonicNotes.length === 0) return -1;
+
+    // Find the earliest start time
+    const earliestStart = Math.min(...tonicNotes.map(({ note }) => note.start));
+
+    // Among notes with earliest start time, find the one with lowest pitch
+    const earliestTonicNotes = tonicNotes.filter(
+      ({ note }) => note.start === earliestStart
+    );
+    const lowestPitchNote = earliestTonicNotes.reduce((lowest, current) =>
+      current.note.pitch < lowest.note.pitch ? current : lowest
+    );
+
+    return lowestPitchNote.index;
+  }, [score.notes, score.tonic]);
+
   return (
     <>
       {score.notes.map((note, index) => {
         const colorIndex = ((note.pitch % 12) + 12 - score.tonic) % 12;
         const color = COLORS[colorIndex];
         const scaleDegree = getScaleDegree(note.pitch, score.tonic);
+
+        // Show letter name for the first tonic note, scale degree for all others
+        const displayText =
+          scaleDegree === "1" && index === firstTonicIndex
+            ? getPitchClassName(score.tonic)
+            : scaleDegree;
+
         const textColor = BRIGHT_SCALE_DEGREES.includes(scaleDegree)
           ? "#000000"
           : "#ffffff";
@@ -196,7 +250,7 @@ const RenderedNotes = ({
               }}
             >
               <span style={{ pointerEvents: "none", userSelect: "none" }}>
-                {scaleDegree}
+                {displayText}
               </span>
             </div>
           </div>
