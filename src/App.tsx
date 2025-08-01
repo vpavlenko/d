@@ -269,11 +269,22 @@ const RenderedNotes = ({
 const NoteEditor = ({
   score: initialScore,
   onScoreChange,
+  editorId,
+  isPlaying,
+  playingNotes,
+  play,
+  stop,
+  playNote,
 }: {
   score: Score;
   onScoreChange: (score: Score) => void;
+  editorId: string;
+  isPlaying: boolean;
+  playingNotes: Set<number>;
+  play: (score: Score, editorId: string) => Promise<void>;
+  stop: () => void;
+  playNote: (pitch: number, duration?: number) => void;
 }) => {
-  const { isPlaying, playingNotes, play, stop, playNote } = usePlayback();
   const [isEditMode, setIsEditMode] = useState(false);
   const [score, setScore] = useState(initialScore);
   const [hoverNote, setHoverNote] = useState<Note | null>(null);
@@ -505,7 +516,7 @@ const NoteEditor = ({
       {/* Control buttons */}
       <div style={{ marginBottom: "10px", display: "flex", gap: "8px" }}>
         <button
-          onClick={() => (isPlaying ? stop() : play(score))}
+          onClick={() => (isPlaying ? stop() : play(score, editorId))}
           style={{
             display: "flex",
             alignItems: "center",
@@ -762,6 +773,16 @@ function App() {
   );
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Global playback system - singleton for all NoteEditors
+  const {
+    isPlaying,
+    currentPlayingEditorId,
+    getPlayingNotesForEditor,
+    play,
+    stop,
+    playNote,
+  } = usePlayback();
+
   // Version comparison and origin tracking on initial load
   useEffect(() => {
     const storedData = loadScoresFromStorage();
@@ -833,16 +854,32 @@ function App() {
         minHeight: "100vh",
       }}
     >
-      {versionedScores.scores.map((score, index) => (
-        <div
-          key={index}
-          style={{
-            display: "flex",
-          }}
-        >
-          <NoteEditor score={score} onScoreChange={handleScoreChange(index)} />
-        </div>
-      ))}
+      {versionedScores.scores.map((score, index) => {
+        const editorId = `editor-${index}`;
+        const editorIsPlaying =
+          isPlaying && currentPlayingEditorId === editorId;
+        const editorPlayingNotes = getPlayingNotesForEditor(editorId);
+
+        return (
+          <div
+            key={index}
+            style={{
+              display: "flex",
+            }}
+          >
+            <NoteEditor
+              score={score}
+              onScoreChange={handleScoreChange(index)}
+              editorId={editorId}
+              isPlaying={editorIsPlaying}
+              playingNotes={editorPlayingNotes}
+              play={play}
+              stop={stop}
+              playNote={playNote}
+            />
+          </div>
+        );
+      })}
 
       {/* Footer with copy button */}
       <div

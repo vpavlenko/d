@@ -14,7 +14,12 @@ const scoreSecondsToRealSeconds = (scoreSeconds: number): number => {
 // Custom hook for playback functionality
 export const usePlayback = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playingNotes, setPlayingNotes] = useState<Set<number>>(new Set());
+  const [currentPlayingEditorId, setCurrentPlayingEditorId] = useState<
+    string | null
+  >(null);
+  const [playingNotesByEditor, setPlayingNotesByEditor] = useState<
+    Map<string, Set<number>>
+  >(new Map());
   const samplerRef = useRef<Tone.Sampler | null>(null);
   const scheduledEventsRef = useRef<number[]>([]);
   const [samplerInitialized, setSamplerInitialized] = useState(false);
@@ -78,7 +83,7 @@ export const usePlayback = () => {
   }, []);
 
   const play = useCallback(
-    async (score: Score) => {
+    async (score: Score, editorId: string) => {
       try {
         const sampler = getSampler();
         if (!sampler || !samplerInitialized) {
@@ -86,7 +91,7 @@ export const usePlayback = () => {
           return;
         }
 
-        // Clear any existing scheduled events
+        // CRITICAL: Clear ALL existing scheduled events (from all editors)
         scheduledEventsRef.current.forEach((id) => Tone.Transport.clear(id));
         scheduledEventsRef.current = [];
 
@@ -95,7 +100,10 @@ export const usePlayback = () => {
         Tone.Transport.position = 0;
 
         setIsPlaying(true);
-        setPlayingNotes(new Set());
+        setCurrentPlayingEditorId(editorId);
+
+        // Clear all editor playing notes and initialize current editor's set
+        setPlayingNotesByEditor(new Map([[editorId, new Set()]]));
 
         // Schedule all notes using Transport.schedule for precise timing
         score.notes.forEach((note, noteIndex) => {
@@ -112,17 +120,25 @@ export const usePlayback = () => {
             // Trigger note with duration
             sampler.triggerAttackRelease(noteName, duration, time, 0.8);
 
-            // Update UI to show this note is playing
-            setPlayingNotes((prev) => new Set([...prev, noteIndex]));
+            // Update UI to show this note is playing for this specific editor
+            setPlayingNotesByEditor((prev) => {
+              const newMap = new Map(prev);
+              const currentSet = newMap.get(editorId) || new Set();
+              newMap.set(editorId, new Set([...currentSet, noteIndex]));
+              return newMap;
+            });
           }, `${realStartTime}`);
 
           // Schedule note end (for UI only, audio handled by triggerAttackRelease)
           const endEventId = Tone.Transport.schedule(() => {
-            // Update UI to remove this note from playing
-            setPlayingNotes((prev) => {
-              const newSet = new Set(prev);
+            // Update UI to remove this note from playing for this specific editor
+            setPlayingNotesByEditor((prev) => {
+              const newMap = new Map(prev);
+              const currentSet = newMap.get(editorId) || new Set();
+              const newSet = new Set(currentSet);
               newSet.delete(noteIndex);
-              return newSet;
+              newMap.set(editorId, newSet);
+              return newMap;
             });
           }, `${realEndTime}`);
 
@@ -136,7 +152,8 @@ export const usePlayback = () => {
         const maxRealEndTime = scoreSecondsToRealSeconds(maxScoreEndTime);
         const stopEventId = Tone.Transport.schedule(() => {
           setIsPlaying(false);
-          setPlayingNotes(new Set());
+          setCurrentPlayingEditorId(null);
+          setPlayingNotesByEditor(new Map());
         }, `${maxRealEndTime + 0.1}`); // Small buffer to ensure all notes finish
 
         scheduledEventsRef.current.push(stopEventId);
@@ -146,7 +163,8 @@ export const usePlayback = () => {
       } catch (error) {
         console.error("Error playing score:", error);
         setIsPlaying(false);
-        setPlayingNotes(new Set());
+        setCurrentPlayingEditorId(null);
+        setPlayingNotesByEditor(new Map());
       }
     },
     [getSampler, samplerInitialized]
@@ -163,13 +181,22 @@ export const usePlayback = () => {
 
     // Reset state
     setIsPlaying(false);
-    setPlayingNotes(new Set());
+    setCurrentPlayingEditorId(null);
+    setPlayingNotesByEditor(new Map());
 
     // Stop all sampler notes
     if (samplerRef.current) {
       samplerRef.current.releaseAll();
     }
   }, []);
+
+  // Helper function to get playing notes for a specific editor
+  const getPlayingNotesForEditor = useCallback(
+    (editorId: string): Set<number> => {
+      return playingNotesByEditor.get(editorId) || new Set();
+    },
+    [playingNotesByEditor]
+  );
 
   const playNote = useCallback(
     (pitch: number, duration: number = 0.3) => {
@@ -202,5 +229,12 @@ export const usePlayback = () => {
     };
   }, [stop]);
 
-  return { isPlaying, playingNotes, play, stop, playNote };
+  return {
+    isPlaying,
+    currentPlayingEditorId,
+    getPlayingNotesForEditor,
+    play,
+    stop,
+    playNote,
+  };
 };
