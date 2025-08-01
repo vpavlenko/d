@@ -508,76 +508,9 @@ const NoteEditor = ({
 
   return (
     <div style={{ marginBottom: "100px" }}>
-      {/* Control buttons */}
-      <div
-        style={{
-          marginBottom: "10px",
-          display: "flex",
-          justifyContent: "center",
-          gap: "8px",
-        }}
-      >
-        <button
-          onClick={() => (isPlaying ? stop() : play(score, editorId))}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "8px",
-            backgroundColor: "transparent",
-            color: "#ccc",
-            border: "none",
-            cursor: "pointer",
-            transition: "color 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#fff";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "#ccc";
-          }}
-        >
-          {isPlaying ? <Square size={20} /> : <Play size={20} />}
-        </button>
-
-        <button
-          onClick={() => setIsEditMode(!isEditMode)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "8px",
-            backgroundColor: isEditMode ? "#fff" : "transparent",
-            color: isEditMode ? "#000" : "#ccc",
-            border: "none",
-            cursor: "pointer",
-            borderRadius: "4px",
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            if (isEditMode) {
-              e.currentTarget.style.backgroundColor = "#ccc";
-              e.currentTarget.style.color = "#000";
-            } else {
-              e.currentTarget.style.color = "#fff";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (isEditMode) {
-              e.currentTarget.style.backgroundColor = "#fff";
-              e.currentTarget.style.color = "#000";
-            } else {
-              e.currentTarget.style.color = "#ccc";
-            }
-          }}
-        >
-          <Pencil size={20} />
-        </button>
-      </div>
-
-      {/* Flexbox layout: Description (200px) + Grid (rest) */}
-      <div style={{ display: "flex", gap: "100px" }}>
-        {/* Description column - 200px fixed */}
+      {/* Four-column layout: Description + Play Button + Grid + Edit Button */}
+      <div style={{ display: "flex", gap: "20px" }}>
+        {/* Description column - 25em fixed */}
         <div
           style={{
             width: "25em",
@@ -615,6 +548,38 @@ const NoteEditor = ({
               {score.description}
             </div>
           )}
+        </div>
+
+        {/* Play button column - shrink to content, vertically centered */}
+        <div
+          style={{
+            flex: 0,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <button
+            onClick={() => (isPlaying ? stop() : play(score, editorId))}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "8px",
+              backgroundColor: "transparent",
+              color: "#888",
+              border: "none",
+              cursor: "pointer",
+              transition: "color 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#fff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#888";
+            }}
+          >
+            {isPlaying ? <Square size={20} /> : <Play size={20} />}
+          </button>
         </div>
 
         {/* Grid column - takes remaining space */}
@@ -760,6 +725,49 @@ const NoteEditor = ({
               onNoteHover={setHoveredNoteIndex}
             />
           </div>
+        </div>
+
+        {/* Edit button column - shrink to content, vertically centered */}
+        <div
+          style={{
+            flex: 0,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <button
+            onClick={() => setIsEditMode(!isEditMode)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "8px",
+              backgroundColor: isEditMode ? "#fff" : "transparent",
+              color: isEditMode ? "#000" : "#888",
+              border: "none",
+              cursor: "pointer",
+              borderRadius: "4px",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              if (isEditMode) {
+                e.currentTarget.style.backgroundColor = "#ccc";
+                e.currentTarget.style.color = "#000";
+              } else {
+                e.currentTarget.style.color = "#fff";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (isEditMode) {
+                e.currentTarget.style.backgroundColor = "#fff";
+                e.currentTarget.style.color = "#000";
+              } else {
+                e.currentTarget.style.color = "#888";
+              }
+            }}
+          >
+            <Pencil size={20} />
+          </button>
         </div>
       </div>
 
