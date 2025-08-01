@@ -830,6 +830,7 @@ function App() {
         padding: "20px",
         gap: "20px",
         minHeight: "100vh",
+        marginTop: "100px",
       }}
     >
       {versionedScores.scores.map((score, index) => {
