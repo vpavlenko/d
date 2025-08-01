@@ -109,8 +109,8 @@ const MeasuresGrid = ({
           key={`measure-number-${measure}`}
           style={{
             position: "absolute",
-            left: `${secondToX(measure) + 5}px`,
-            top: "5px",
+            left: `${secondToX(measure) + 7}px`,
+            top: "-2px",
             color: "#ccc",
             fontSize: "12px",
             fontWeight: "bold",

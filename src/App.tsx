@@ -24,9 +24,10 @@ const shouldShowEditingUI = (): boolean => {
 
   // Check for ?edit=1 flag
   const urlParams = new URLSearchParams(window.location.search);
-  const hasEditFlag = urlParams.get("edit") === "1";
+  const hasEditFlagEnabled = urlParams.get("edit") === "1";
+  const hasEditFlagDisabled = urlParams.get("edit") === "0";
 
-  return isLocalhost || hasEditFlag;
+  return !hasEditFlagDisabled && (isLocalhost || hasEditFlagEnabled);
 };
 
 const COLORS = [
@@ -44,11 +45,11 @@ const COLORS = [
   "#ffff00",
 ];
 
-export const PX_PER_SECOND = 200;
+export const PX_PER_SECOND = 180;
 export const EIGHTH_NOTE_DURATION = 0.125; // 1/8th note in seconds
-export const PITCH_DISTANCE = 7;
+export const PITCH_DISTANCE = 6;
 export const NOTE_HEIGHT = 2 * PITCH_DISTANCE;
-export const HEADER_HEIGHT = 20;
+export const HEADER_HEIGHT = 15;
 
 // Scale degree mapping array
 const SCALE_DEGREES = [
@@ -563,7 +564,7 @@ const NoteEditor = forwardRef<
     );
 
     return (
-      <div style={{ marginBottom: "100px" }}>
+      <div style={{ marginBottom: "0px" }}>
         {/* Four-column layout: Description + Play Button + Grid + Edit Button */}
         <div style={{ display: "flex", gap: "0px" }}>
           {/* Description column - 25em fixed */}
@@ -946,7 +947,7 @@ function App() {
             style={{
               display: "flex",
               margin: "auto",
-              marginBottom: "100px",
+              marginBottom: "80px",
             }}
           >
             <NoteEditor
