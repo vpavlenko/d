@@ -22,6 +22,8 @@ export const usePlayback = () => {
   >(new Map());
   const samplerRef = useRef<Tone.Sampler | null>(null);
   const scheduledEventsRef = useRef<number[]>([]);
+  const individualNoteTimeoutsRef = useRef<Map<string, number>>(new Map());
+  const individualNoteReleasesRef = useRef<Map<string, string>>(new Map());
   const [samplerInitialized, setSamplerInitialized] = useState(false);
 
   // Initialize sampler immediately when hook is used
@@ -254,6 +256,21 @@ export const usePlayback = () => {
       console.log("❌ No sampler found!");
     }
 
+    // Clear all individual note timeouts and release any stuck individual notes
+    console.log("⏱️ Clearing individual note timeouts and releases");
+    individualNoteTimeoutsRef.current.forEach((timeout) =>
+      clearTimeout(timeout)
+    );
+    individualNoteTimeoutsRef.current.clear();
+
+    // Release any individually playing notes immediately
+    if (samplerRef.current) {
+      individualNoteReleasesRef.current.forEach((noteName) => {
+        samplerRef.current!.triggerRelease(noteName, Tone.now());
+      });
+    }
+    individualNoteReleasesRef.current.clear();
+
     // Reset state
     console.log("🔄 Resetting UI state");
     setIsPlaying(false);
@@ -271,8 +288,22 @@ export const usePlayback = () => {
     [playingNotesByEditor]
   );
 
+  // Helper function to get individually playing notes for a specific editor
+  const getIndividuallyPlayingNotesForEditor = useCallback(
+    (editorId: string): Set<number> => {
+      const individualEditorId = `${editorId}-individual`;
+      return playingNotesByEditor.get(individualEditorId) || new Set();
+    },
+    [playingNotesByEditor]
+  );
+
   const playNote = useCallback(
-    (pitch: number, duration: number = 0.3) => {
+    (
+      pitch: number,
+      duration: number,
+      noteIndex?: number,
+      editorId?: string
+    ) => {
       const sampler = getSampler();
       // Only play if sampler is initialized
       if (!samplerInitialized || !sampler) {
@@ -283,8 +314,75 @@ export const usePlayback = () => {
         // Convert MIDI number to note name for sampler
         const noteName = Tone.Frequency(pitch, "midi").toNote();
 
-        // Play note immediately with specified duration using note name
-        sampler.triggerAttackRelease(noteName, duration, undefined, 0.6);
+        // Use existing playingNotesByEditor system with special individual editor ID
+        const individualEditorId = editorId
+          ? `${editorId}-individual`
+          : "individual";
+        const trackingKey =
+          noteIndex !== undefined
+            ? `${individualEditorId}-${noteIndex}`
+            : `${individualEditorId}-${pitch}`;
+
+        // Clear any existing timeout and release for this tracking key
+        const existingTimeout =
+          individualNoteTimeoutsRef.current.get(trackingKey);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
+        }
+        const existingNoteName =
+          individualNoteReleasesRef.current.get(trackingKey);
+        if (existingNoteName) {
+          // Release the previous note immediately
+          sampler.triggerRelease(existingNoteName, Tone.now());
+          individualNoteReleasesRef.current.delete(trackingKey);
+        }
+
+        // Add to playingNotesByEditor using the existing system
+        const noteIndexToTrack =
+          noteIndex !== undefined ? noteIndex : Math.abs(pitch) + 1000; // Use high numbers for pitch-only notes
+        setPlayingNotesByEditor((prev) => {
+          const newMap = new Map(prev);
+          const currentSet = newMap.get(individualEditorId) || new Set();
+          newMap.set(
+            individualEditorId,
+            new Set([...currentSet, noteIndexToTrack])
+          );
+          return newMap;
+        });
+
+        // Trigger attack immediately (no scheduling delay)
+        sampler.triggerAttack(noteName, Tone.now(), 0.6);
+
+        // Store the note name for potential early release during panic
+        individualNoteReleasesRef.current.set(trackingKey, noteName);
+
+        // CRITICAL: Use BPM conversion like the main play method
+        // Convert score duration to real playback duration
+        const realDuration = scoreSecondsToRealSeconds(duration);
+
+        // Schedule release after the BPM-converted duration
+        const timeout = setTimeout(() => {
+          // Trigger release
+          sampler.triggerRelease(noteName, Tone.now());
+
+          // Remove from playingNotesByEditor and cleanup
+          setPlayingNotesByEditor((prev) => {
+            const newMap = new Map(prev);
+            const currentSet = newMap.get(individualEditorId) || new Set();
+            const newSet = new Set(currentSet);
+            newSet.delete(noteIndexToTrack);
+            if (newSet.size === 0) {
+              newMap.delete(individualEditorId);
+            } else {
+              newMap.set(individualEditorId, newSet);
+            }
+            return newMap;
+          });
+          individualNoteTimeoutsRef.current.delete(trackingKey);
+          individualNoteReleasesRef.current.delete(trackingKey);
+        }, realDuration * 1000); // Convert to milliseconds
+
+        individualNoteTimeoutsRef.current.set(trackingKey, timeout);
       } catch (error) {
         console.error("Error playing note:", error);
       }
@@ -306,6 +404,7 @@ export const usePlayback = () => {
     isPlaying,
     currentPlayingEditorId,
     getPlayingNotesForEditor,
+    getIndividuallyPlayingNotesForEditor,
     play,
     stop,
     playNote,

@@ -96,23 +96,32 @@ const RenderedNotes = ({
   secondToX,
   pitchToY,
   playingNotes,
+  individuallyPlayingNotes,
   onNoteClick,
   isEditMode,
   playNote,
   onNoteDelete,
   hoveredNoteIndex,
   onNoteHover,
+  editorId,
 }: {
   score: Score;
   secondToX: (second: number) => number;
   pitchToY: (pitch: number) => number;
   playingNotes: Set<number>;
+  individuallyPlayingNotes: Set<number>;
   onNoteClick: (index: number) => void;
   isEditMode?: boolean;
-  playNote: (pitch: number) => void;
+  playNote: (
+    pitch: number,
+    duration: number,
+    noteIndex?: number,
+    editorId?: string
+  ) => void;
   onNoteDelete: (index: number) => void;
   hoveredNoteIndex?: number | null;
   onNoteHover: (index: number | null) => void;
+  editorId: string;
 }) => {
   // Find the index of the leftmost (earliest start time) scale degree 1 note,
   // with lowest pitch as tiebreaker
@@ -157,7 +166,9 @@ const RenderedNotes = ({
           ? "#000000"
           : "#ffffff";
 
-        const isPlaying = playingNotes.has(index);
+        // Check if note is playing either in sequence or individually (by note index)
+        const isPlaying =
+          playingNotes.has(index) || individuallyPlayingNotes.has(index);
         const haloEffect = isPlaying
           ? `0 0 5px ${color}, 0 0 10px ${color}, 0 0 15px ${color}`
           : "none";
@@ -209,9 +220,15 @@ const RenderedNotes = ({
               }
             }}
             onMouseEnter={() => {
-              if (isEditMode && !isAdding) {
-                playNote(note.pitch);
-                onNoteHover(index);
+              if (!isAdding) {
+                // Always play note on hover (both edit and non-edit mode)
+                // Pass noteIndex and editorId for editor-specific note animation tracking
+                // Use actual note duration (end - start) instead of fixed 0.3 seconds
+                playNote(note.pitch, note.end - note.start, index, editorId);
+                // Only track hover state for edit mode (for delete scaling)
+                if (isEditMode) {
+                  onNoteHover(index);
+                }
               }
             }}
             onMouseLeave={() => {
@@ -235,7 +252,7 @@ const RenderedNotes = ({
                 fontSize: `${NOTE_HEIGHT}px`,
                 fontWeight: "bold",
                 boxShadow: haloEffect,
-                transition: "transform 0.1s ease-in-out",
+                transition: "transform 0.1s ease-in-out", // No transition on box-shadow for immediate animation
                 transform,
               }}
             >
@@ -262,6 +279,7 @@ const NoteEditor = ({
   editorId,
   isPlaying,
   playingNotes,
+  individuallyPlayingNotes,
   play,
   stop,
   playNote,
@@ -273,9 +291,15 @@ const NoteEditor = ({
   editorId: string;
   isPlaying: boolean;
   playingNotes: Set<number>;
+  individuallyPlayingNotes: Set<number>;
   play: (score: Score, editorId: string) => Promise<void>;
   stop: () => void;
-  playNote: (pitch: number, duration?: number) => void;
+  playNote: (
+    pitch: number,
+    duration: number,
+    noteIndex?: number,
+    editorId?: string
+  ) => void;
   onAddNewScore: () => void;
   showEditingUI: boolean;
 }) => {
@@ -621,7 +645,8 @@ const NoteEditor = ({
                   );
 
                   // Play note sound when starting drag
-                  playNote(pitch);
+                  // Use a short duration for creation feedback
+                  playNote(pitch, 0.3);
 
                   // Start dragging - create initial note with fixed pitch and start
                   const initialNote: Note = {
@@ -716,12 +741,14 @@ const NoteEditor = ({
               secondToX={secondToX}
               pitchToY={pitchToY}
               playingNotes={playingNotes}
+              individuallyPlayingNotes={individuallyPlayingNotes}
               onNoteClick={handleNoteClick}
               isEditMode={isEditMode}
               playNote={playNote}
               onNoteDelete={handleNoteDelete}
               hoveredNoteIndex={hoveredNoteIndex}
               onNoteHover={setHoveredNoteIndex}
+              editorId={editorId}
             />
           </div>
         </div>
@@ -812,6 +839,7 @@ function App() {
     isPlaying,
     currentPlayingEditorId,
     getPlayingNotesForEditor,
+    getIndividuallyPlayingNotesForEditor,
     play,
     stop,
     playNote,
@@ -837,6 +865,8 @@ function App() {
         const editorIsPlaying =
           isPlaying && currentPlayingEditorId === editorId;
         const editorPlayingNotes = getPlayingNotesForEditor(editorId);
+        const editorIndividuallyPlayingNotes =
+          getIndividuallyPlayingNotesForEditor(editorId);
 
         return (
           <div
@@ -853,6 +883,7 @@ function App() {
               editorId={editorId}
               isPlaying={editorIsPlaying}
               playingNotes={editorPlayingNotes}
+              individuallyPlayingNotes={editorIndividuallyPlayingNotes}
               play={play}
               stop={stop}
               playNote={playNote}
