@@ -956,93 +956,6 @@ export const defaultScores: VersionedScores = {
           pitch: 52,
         },
         {
-          start: 2.25,
-          end: 2.375,
-          pitch: 54,
-        },
-        {
-          start: 2.5,
-          end: 2.625,
-          pitch: 57,
-        },
-        {
-          start: 2.75,
-          end: 2.875,
-          pitch: 61,
-        },
-        {
-          start: 3.25,
-          end: 3.375,
-          pitch: 49,
-        },
-        {
-          start: 3.5,
-          end: 3.625,
-          pitch: 52,
-        },
-        {
-          start: 3.75,
-          end: 3.875,
-          pitch: 56,
-        },
-        {
-          start: 4.25,
-          end: 4.375,
-          pitch: 56,
-        },
-        {
-          start: 4.5,
-          end: 4.625,
-          pitch: 59,
-        },
-        {
-          start: 4.75,
-          end: 4.875,
-          pitch: 62,
-        },
-        {
-          start: 1.25,
-          end: 1.375,
-          pitch: 57,
-        },
-        {
-          start: 1.5,
-          end: 1.625,
-          pitch: 61,
-        },
-        {
-          start: 1.75,
-          end: 1.875,
-          pitch: 64,
-        },
-      ],
-      tonic: 9,
-      description:
-        "To build a chord from a bass, we take every other note above it",
-    },
-    {
-      notes: [
-        {
-          start: 1,
-          end: 2,
-          pitch: 54,
-        },
-        {
-          start: 2,
-          end: 3,
-          pitch: 50,
-        },
-        {
-          start: 3,
-          end: 4,
-          pitch: 45,
-        },
-        {
-          start: 4,
-          end: 5,
-          pitch: 52,
-        },
-        {
           start: 1.25,
           end: 2,
           pitch: 57,
@@ -1051,11 +964,6 @@ export const defaultScores: VersionedScores = {
           start: 1.5,
           end: 2,
           pitch: 61,
-        },
-        {
-          start: 1.75,
-          end: 2,
-          pitch: 64,
         },
         {
           start: 2.25,
@@ -1068,11 +976,6 @@ export const defaultScores: VersionedScores = {
           pitch: 57,
         },
         {
-          start: 2.75,
-          end: 3,
-          pitch: 61,
-        },
-        {
           start: 3.25,
           end: 4,
           pitch: 49,
@@ -1081,11 +984,6 @@ export const defaultScores: VersionedScores = {
           start: 3.5,
           end: 4,
           pitch: 52,
-        },
-        {
-          start: 3.75,
-          end: 4,
-          pitch: 56,
         },
         {
           start: 4.25,
@@ -1097,168 +995,10 @@ export const defaultScores: VersionedScores = {
           end: 5,
           pitch: 59,
         },
-        {
-          start: 4.75,
-          end: 5,
-          pitch: 62,
-        },
-      ],
-      tonic: 9,
-      description: "Or we can layer the notes of the chord together",
-    },
-    {
-      notes: [
-        {
-          start: 1,
-          end: 2,
-          pitch: 54,
-        },
-        {
-          start: 2,
-          end: 3,
-          pitch: 50,
-        },
-        {
-          start: 3,
-          end: 4,
-          pitch: 45,
-        },
-        {
-          start: 4,
-          end: 5,
-          pitch: 52,
-        },
-        {
-          start: 1,
-          end: 2,
-          pitch: 57,
-        },
-        {
-          start: 1,
-          end: 2,
-          pitch: 61,
-        },
-        {
-          start: 1,
-          end: 2,
-          pitch: 64,
-        },
-        {
-          start: 2,
-          end: 3,
-          pitch: 54,
-        },
-        {
-          start: 2,
-          end: 3,
-          pitch: 57,
-        },
-        {
-          start: 2,
-          end: 3,
-          pitch: 61,
-        },
-        {
-          start: 3,
-          end: 4,
-          pitch: 49,
-        },
-        {
-          start: 4,
-          end: 5,
-          pitch: 56,
-        },
-        {
-          start: 4,
-          end: 5,
-          pitch: 59,
-        },
-        {
-          start: 4,
-          end: 5,
-          pitch: 62,
-        },
-        {
-          start: 3,
-          end: 4,
-          pitch: 52,
-        },
-        {
-          start: 3,
-          end: 4,
-          pitch: 56,
-        },
       ],
       tonic: 9,
       description:
-        "You may notice that our colors are somewhat random. They aren't in rainbow order. Why?\n\nI picked them so that the most common chords look coherent. Like these ones. Some are warmer, others are colder. ",
-    },
-    {
-      notes: [
-        {
-          start: 1,
-          end: 2,
-          pitch: 54,
-        },
-        {
-          start: 2,
-          end: 3,
-          pitch: 50,
-        },
-        {
-          start: 3,
-          end: 4,
-          pitch: 45,
-        },
-        {
-          start: 4,
-          end: 5,
-          pitch: 52,
-        },
-        {
-          start: 1,
-          end: 2,
-          pitch: 57,
-        },
-        {
-          start: 1,
-          end: 2,
-          pitch: 61,
-        },
-        {
-          start: 2,
-          end: 3,
-          pitch: 54,
-        },
-        {
-          start: 2,
-          end: 3,
-          pitch: 57,
-        },
-        {
-          start: 3,
-          end: 4,
-          pitch: 49,
-        },
-        {
-          start: 4,
-          end: 5,
-          pitch: 56,
-        },
-        {
-          start: 4,
-          end: 5,
-          pitch: 59,
-        },
-        {
-          start: 3,
-          end: 4,
-          pitch: 52,
-        },
-      ],
-      tonic: 9,
-      description:
-        "Yiruma doesn't use the dreamy chords as above. He plays three notes instead of four",
+        "The root is the first note of the chord. To complete the chord, we take a third and a fifth, counting up from the root",
     },
     {
       notes: [
@@ -1323,11 +1063,6 @@ export const defaultScores: VersionedScores = {
           pitch: 85,
         },
         {
-          start: 1.5625,
-          end: 2,
-          pitch: 90,
-        },
-        {
           start: 2.0625,
           end: 3,
           pitch: 54,
@@ -1366,11 +1101,6 @@ export const defaultScores: VersionedScores = {
           start: 2.5,
           end: 3,
           pitch: 81,
-        },
-        {
-          start: 2.5625,
-          end: 3,
-          pitch: 86,
         },
         {
           start: 4.0625,
@@ -1413,11 +1143,6 @@ export const defaultScores: VersionedScores = {
           pitch: 83,
         },
         {
-          start: 4.5625,
-          end: 5,
-          pitch: 88,
-        },
-        {
           start: 3.0625,
           end: 4,
           pitch: 49,
@@ -1457,14 +1182,9 @@ export const defaultScores: VersionedScores = {
           end: 4,
           pitch: 76,
         },
-        {
-          start: 3.5625,
-          end: 4,
-          pitch: 81,
-        },
       ],
       tonic: 9,
-      description: "You can layer colors in many octaves",
+      description: "We can layer colors across many octaves",
     },
     {
       notes: [
@@ -1529,11 +1249,6 @@ export const defaultScores: VersionedScores = {
           pitch: 85,
         },
         {
-          start: 1.5625,
-          end: 2,
-          pitch: 90,
-        },
-        {
           start: 2.125,
           end: 3,
           pitch: 57,
@@ -1557,11 +1272,6 @@ export const defaultScores: VersionedScores = {
           start: 2.5,
           end: 3,
           pitch: 81,
-        },
-        {
-          start: 2.5625,
-          end: 3,
-          pitch: 86,
         },
         {
           start: 4.0625,
@@ -1604,11 +1314,6 @@ export const defaultScores: VersionedScores = {
           pitch: 83,
         },
         {
-          start: 4.5625,
-          end: 5,
-          pitch: 88,
-        },
-        {
           start: 3.0625,
           end: 4,
           pitch: 49,
@@ -1649,11 +1354,6 @@ export const defaultScores: VersionedScores = {
           pitch: 76,
         },
         {
-          start: 3.5625,
-          end: 4,
-          pitch: 81,
-        },
-        {
           start: 2.4375,
           end: 3,
           pitch: 76,
@@ -1670,7 +1370,8 @@ export const defaultScores: VersionedScores = {
         },
       ],
       tonic: 9,
-      description: "Yiruma uses a 4 chord with a pitch 5 instead of 6",
+      description:
+        "Yiruma uses a 4 chord with a pitch 5 instead of 6. He does that in other compositions as well",
     },
     {
       notes: [
@@ -3441,5 +3142,5 @@ export const defaultScores: VersionedScores = {
         "Yiruma sustains notes with a pedal till the end of every measure, so the actual sound is more like this. As the drawn out sustained notes are harder to read, we'll use the shorter ones",
     },
   ],
-  version: 4388,
+  version: 4421,
 };
