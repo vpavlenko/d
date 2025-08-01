@@ -217,7 +217,7 @@ const RenderedNotes = ({
                 alignItems: "center",
                 justifyContent: "center",
                 color: textColor,
-                fontSize: `${NOTE_HEIGHT - 2}px`,
+                fontSize: `${NOTE_HEIGHT - 1}px`,
                 fontWeight: "bold",
                 fontFamily: "monospace",
                 boxShadow: haloEffect,

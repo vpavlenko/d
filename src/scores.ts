@@ -933,6 +933,440 @@ export const defaultScores: VersionedScores = {
       tonic: 9,
       description: "We can also play the scale from the bass note",
     },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 2.25,
+          end: 2.375,
+          pitch: 54,
+        },
+        {
+          start: 2.5,
+          end: 2.625,
+          pitch: 57,
+        },
+        {
+          start: 2.75,
+          end: 2.875,
+          pitch: 61,
+        },
+        {
+          start: 3.25,
+          end: 3.375,
+          pitch: 49,
+        },
+        {
+          start: 3.5,
+          end: 3.625,
+          pitch: 52,
+        },
+        {
+          start: 3.75,
+          end: 3.875,
+          pitch: 56,
+        },
+        {
+          start: 4.25,
+          end: 4.375,
+          pitch: 56,
+        },
+        {
+          start: 4.5,
+          end: 4.625,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 4.875,
+          pitch: 62,
+        },
+        {
+          start: 1.25,
+          end: 1.375,
+          pitch: 57,
+        },
+        {
+          start: 1.5,
+          end: 1.625,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 1.875,
+          pitch: 64,
+        },
+      ],
+      tonic: 9,
+      description:
+        "To build a chord from a bass, we take every other note above it",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.25,
+          end: 2,
+          pitch: 57,
+        },
+        {
+          start: 1.5,
+          end: 2,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 64,
+        },
+        {
+          start: 2.25,
+          end: 3,
+          pitch: 54,
+        },
+        {
+          start: 2.5,
+          end: 3,
+          pitch: 57,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 61,
+        },
+        {
+          start: 3.25,
+          end: 4,
+          pitch: 49,
+        },
+        {
+          start: 3.5,
+          end: 4,
+          pitch: 52,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 56,
+        },
+        {
+          start: 4.25,
+          end: 5,
+          pitch: 56,
+        },
+        {
+          start: 4.5,
+          end: 5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 62,
+        },
+      ],
+      tonic: 9,
+      description: "Of we can layer the notes of the chord together",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1,
+          end: 2,
+          pitch: 57,
+        },
+        {
+          start: 1,
+          end: 2,
+          pitch: 61,
+        },
+        {
+          start: 1,
+          end: 2,
+          pitch: 64,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 54,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 61,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 49,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 56,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 59,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 62,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 52,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 56,
+        },
+      ],
+      tonic: 9,
+      description:
+        "You may notice that our colors are somewhat random. They aren't in rainbow order. Why?\n\nI picked them so that the most common chords look coherent. Like these ones. Some are warmer, others are colder. ",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 69,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 66,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 68,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+      ],
+      tonic: 9,
+      description:
+        "Now let's play the first three notes of each chord sequentially, is some repeating pattern. Doing anything like that is called arpeggio",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+      ],
+      tonic: 9,
+      description:
+        "Actually, Yiruma plays it a bit differently, with more freedom and creativity, if you like",
+    },
   ],
-  version: 856,
+  version: 1871,
 };

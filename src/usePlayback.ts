@@ -105,11 +105,21 @@ export const usePlayback = () => {
         // Clear all editor playing notes and initialize current editor's set
         setPlayingNotesByEditor(new Map([[editorId, new Set()]]));
 
+        // Find minimum start time to skip initial silence
+        const minStartTime =
+          score.notes.length > 0
+            ? Math.min(...score.notes.map((note) => note.start))
+            : 0;
+
         // Schedule all notes using Transport.schedule for precise timing
         score.notes.forEach((note, noteIndex) => {
-          // Convert score time to real playback time
-          const realStartTime = scoreSecondsToRealSeconds(note.start);
-          const realEndTime = scoreSecondsToRealSeconds(note.end);
+          // Convert score time to real playback time and subtract minimum start time to skip silence
+          const realStartTime = scoreSecondsToRealSeconds(
+            note.start - minStartTime
+          );
+          const realEndTime = scoreSecondsToRealSeconds(
+            note.end - minStartTime
+          );
 
           // Schedule note start
           const startEventId = Tone.Transport.schedule((time) => {
@@ -145,11 +155,13 @@ export const usePlayback = () => {
           scheduledEventsRef.current.push(startEventId, endEventId);
         });
 
-        // Schedule transport stop at the end
+        // Schedule transport stop at the end (adjusted for skipped silence)
         const maxScoreEndTime = Math.max(
           ...score.notes.map((note) => note.end)
         );
-        const maxRealEndTime = scoreSecondsToRealSeconds(maxScoreEndTime);
+        const maxRealEndTime = scoreSecondsToRealSeconds(
+          maxScoreEndTime - minStartTime
+        );
         const stopEventId = Tone.Transport.schedule(() => {
           setIsPlaying(false);
           setCurrentPlayingEditorId(null);
