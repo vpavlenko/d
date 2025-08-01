@@ -74,12 +74,12 @@ const RenderedNotes = ({
   secondToX: (second: number) => number;
   pitchToY: (pitch: number) => number;
   playingNotes: Set<number>;
-  onNoteClick?: (index: number) => void;
+  onNoteClick: (index: number) => void;
   isEditMode?: boolean;
-  playNote?: (pitch: number) => void;
-  onNoteDelete?: (index: number) => void;
+  playNote: (pitch: number) => void;
+  onNoteDelete: (index: number) => void;
   hoveredNoteIndex?: number | null;
-  onNoteHover?: (index: number | null) => void;
+  onNoteHover: (index: number | null) => void;
 }) => {
   return (
     <>
@@ -107,7 +107,7 @@ const RenderedNotes = ({
 
         // Determine cursor based on edit mode and note state
         let cursor = "default";
-        if (isAdding && onNoteClick) {
+        if (isAdding) {
           cursor = "pointer";
         } else if (isEditMode && !isAdding) {
           // Use same color logic for cursor as text
@@ -137,20 +137,20 @@ const RenderedNotes = ({
             }}
             onClick={() => {
               if (isAdding) {
-                onNoteClick?.(index);
+                onNoteClick(index);
               } else if (isEditMode && !isAdding) {
-                onNoteDelete?.(index);
+                onNoteDelete(index);
               }
             }}
             onMouseEnter={() => {
-              if (isEditMode && !isAdding && playNote) {
+              if (isEditMode && !isAdding) {
                 playNote(note.pitch);
-                onNoteHover?.(index);
+                onNoteHover(index);
               }
             }}
             onMouseLeave={() => {
               if (isEditMode && !isAdding) {
-                onNoteHover?.(null);
+                onNoteHover(null);
               }
             }}
           >
@@ -166,7 +166,7 @@ const RenderedNotes = ({
                 alignItems: "center",
                 justifyContent: "center",
                 color: textColor,
-                fontSize: "12px",
+                fontSize: "14px",
                 fontWeight: "bold",
                 fontFamily: "monospace",
                 boxShadow: haloEffect,
