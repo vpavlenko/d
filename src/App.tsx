@@ -708,7 +708,7 @@ const NoteEditor = ({
                 border: "1px solid #666",
                 borderRadius: "4px",
                 padding: "8px",
-                fontFamily: "Arial, sans-serif",
+                fontFamily: "Quicksand, sans-serif",
                 fontSize: "14px",
                 resize: "vertical",
               }}
@@ -719,7 +719,7 @@ const NoteEditor = ({
               style={{
                 color: "#fff",
                 fontSize: "16px",
-                fontFamily: "Arial, sans-serif",
+                fontFamily: "Quicksand, sans-serif",
                 lineHeight: "1.4",
                 wordWrap: "break-word",
               }}
