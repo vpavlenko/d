@@ -5,6 +5,21 @@ import { Grid } from "./Grid";
 import type { Note, Score } from "./types";
 import { useScoreStorage } from "./scoreStorage";
 
+// Check if we should show editing/storage UI
+const shouldShowEditingUI = (): boolean => {
+  // Check if running on localhost
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "";
+
+  // Check for ?edit=1 flag
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasEditFlag = urlParams.get("edit") === "1";
+
+  return isLocalhost || hasEditFlag;
+};
+
 const COLORS = [
   "#ffffff",
   "#820000",
@@ -252,6 +267,7 @@ const NoteEditor = ({
   stop,
   playNote,
   onAddNewScore,
+  showEditingUI,
 }: {
   score: Score;
   onScoreChange: (score: Score) => void;
@@ -262,6 +278,7 @@ const NoteEditor = ({
   stop: () => void;
   playNote: (pitch: number, duration?: number) => void;
   onAddNewScore: () => void;
+  showEditingUI: boolean;
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [score, setScore] = useState(initialScore);
@@ -746,32 +763,34 @@ const NoteEditor = ({
         </div>
       </div>
 
-      {/* Add new score button */}
-      <div style={{ marginTop: "20px", textAlign: "center" }}>
-        <button
-          onClick={onAddNewScore}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "transparent",
-            color: "#ccc",
-            border: "1px solid #666",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "14px",
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#fff";
-            e.currentTarget.style.borderColor = "#999";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "#ccc";
-            e.currentTarget.style.borderColor = "#666";
-          }}
-        >
-          Add a new score
-        </button>
-      </div>
+      {/* Add new score button - only show in editing mode */}
+      {showEditingUI && (
+        <div style={{ marginTop: "20px", textAlign: "center" }}>
+          <button
+            onClick={onAddNewScore}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "transparent",
+              color: "#ccc",
+              border: "1px solid #666",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "14px",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.borderColor = "#999";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#ccc";
+              e.currentTarget.style.borderColor = "#666";
+            }}
+          >
+            Add a new score
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -790,6 +809,9 @@ function App() {
     stop,
     playNote,
   } = usePlayback();
+
+  // Check if we should show editing UI
+  const showEditingUI = shouldShowEditingUI();
 
   return (
     <div
@@ -827,13 +849,14 @@ function App() {
               stop={stop}
               playNote={playNote}
               onAddNewScore={() => addNewScore(score, index)}
+              showEditingUI={showEditingUI}
             />
           </div>
         );
       })}
 
-      {/* Score storage UI (copy button and version display) */}
-      <ScoreStorageUI />
+      {/* Score storage UI (copy button and version display) - only show in editing mode */}
+      {showEditingUI && <ScoreStorageUI />}
     </div>
   );
 }
