@@ -4,7 +4,7 @@ import type { Score } from "./types";
 import { loadPianoSamples } from "./samples";
 
 // Global BPM constant for playback tempo
-const PLAYBACK_BPM = 100;
+const PLAYBACK_BPM = 120;
 const REFERENCE_BPM = 240; // BPM that score seconds were originally designed for
 
 // Convert score seconds to real playback seconds based on BPM

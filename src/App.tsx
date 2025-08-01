@@ -646,7 +646,7 @@ const NoteEditor = forwardRef<
           >
             {/* Top row: Description + Buttons */}
             <div
-              style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}
+              style={{ display: "flex", gap: "10px", alignItems: "stretch" }}
             >
               {/* Description - takes most space */}
               <div style={{ flex: 1 }}>
@@ -684,7 +684,9 @@ const NoteEditor = forwardRef<
               </div>
 
               {/* Buttons row */}
-              <div style={{ display: "flex", gap: "5px" }}>
+              <div
+                style={{ display: "flex", gap: "5px", alignItems: "stretch" }}
+              >
                 {/* Play button */}
                 <button
                   onClick={() => (isPlaying ? stop() : play(score, editorId))}
@@ -692,12 +694,13 @@ const NoteEditor = forwardRef<
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    padding: "8px 18px",
+                    padding: "0 18px",
                     backgroundColor: "transparent",
                     color: "#888",
                     border: "none",
                     cursor: "pointer",
                     transition: "color 0.2s ease",
+                    minHeight: "100%",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.color = "#fff";
@@ -716,13 +719,14 @@ const NoteEditor = forwardRef<
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    padding: "8px 18px",
+                    padding: "0 18px",
                     backgroundColor: isEditMode ? "#fff" : "transparent",
                     color: isEditMode ? "#000" : "#888",
                     border: "none",
                     cursor: "pointer",
                     borderRadius: "4px",
                     transition: "all 0.2s ease",
+                    minHeight: "100%",
                   }}
                   onMouseEnter={(e) => {
                     if (isEditMode) {

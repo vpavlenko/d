@@ -226,7 +226,7 @@ export const RenderedNotes = ({
                 alignItems: "center",
                 justifyContent: "center",
                 color: textColor,
-                fontSize: `${NOTE_HEIGHT}px`,
+                fontSize: `${NOTE_HEIGHT + 1}px`,
                 fontWeight: "bold",
                 boxShadow: haloEffect,
                 transition: "transform 0.1s ease-in-out", // No transition on box-shadow for immediate animation

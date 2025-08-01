@@ -1596,6 +1596,93 @@ export const defaultScores: VersionedScores = {
           pitch: 52,
         },
         {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 62,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 57,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+      ],
+      tonic: 9,
+      description:
+        "Or maybe we can use just the bass and note that's +4 over it",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
           start: 3.5,
           end: 3.75,
           pitch: 61,
@@ -1638,7 +1725,7 @@ export const defaultScores: VersionedScores = {
       ],
       tonic: 9,
       description:
-        "Actually, Yiruma plays it a bit differently, with more freedom and creativity, if you like",
+        "Yiruma combines both ideas with a modern 5 note above the 4 bass",
     },
     {
       notes: [
@@ -2764,6 +2851,237 @@ export const defaultScores: VersionedScores = {
       tonic: 9,
       description: "Could he do hills all the way?",
     },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+        {
+          start: 4,
+          end: 4.5,
+          pitch: 80,
+        },
+        {
+          start: 3,
+          end: 3.125,
+          pitch: 81,
+        },
+        {
+          start: 3.125,
+          end: 3.25,
+          pitch: 83,
+        },
+        {
+          start: 3.25,
+          end: 3.375,
+          pitch: 85,
+        },
+        {
+          start: 3.375,
+          end: 3.5,
+          pitch: 86,
+        },
+        {
+          start: 3.5,
+          end: 3.625,
+          pitch: 88,
+        },
+        {
+          start: 3.625,
+          end: 3.75,
+          pitch: 85,
+        },
+        {
+          start: 3.75,
+          end: 3.875,
+          pitch: 83,
+        },
+        {
+          start: 3.875,
+          end: 4,
+          pitch: 81,
+        },
+        {
+          start: 1,
+          end: 1.125,
+          pitch: 81,
+        },
+        {
+          start: 2,
+          end: 2.125,
+          pitch: 81,
+        },
+        {
+          start: 0.75,
+          end: 0.875,
+          pitch: 81,
+        },
+        {
+          start: 0.625,
+          end: 0.75,
+          pitch: 83,
+        },
+        {
+          start: 0.5,
+          end: 0.625,
+          pitch: 81,
+        },
+        {
+          start: 0.875,
+          end: 1,
+          pitch: 80,
+        },
+        {
+          start: 1.125,
+          end: 1.25,
+          pitch: 69,
+        },
+        {
+          start: 1.25,
+          end: 1.375,
+          pitch: 76,
+        },
+        {
+          start: 1.375,
+          end: 1.5,
+          pitch: 69,
+        },
+        {
+          start: 1.875,
+          end: 2,
+          pitch: 80,
+        },
+        {
+          start: 1.75,
+          end: 1.875,
+          pitch: 81,
+        },
+        {
+          start: 1.625,
+          end: 1.75,
+          pitch: 83,
+        },
+        {
+          start: 1.5,
+          end: 1.625,
+          pitch: 81,
+        },
+        {
+          start: 2.125,
+          end: 2.25,
+          pitch: 69,
+        },
+        {
+          start: 2.25,
+          end: 2.375,
+          pitch: 76,
+        },
+        {
+          start: 2.375,
+          end: 2.5,
+          pitch: 69,
+        },
+        {
+          start: 2.5,
+          end: 2.625,
+          pitch: 81,
+        },
+        {
+          start: 2.625,
+          end: 2.75,
+          pitch: 83,
+        },
+        {
+          start: 2.75,
+          end: 2.875,
+          pitch: 81,
+        },
+        {
+          start: 2.875,
+          end: 3,
+          pitch: 80,
+        },
+      ],
+      tonic: 9,
+      description: "Instead, Yiruma added fills between main 1 notes",
+    },
   ],
-  version: 3000,
+  version: 3355,
 };
