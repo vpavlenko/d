@@ -217,16 +217,21 @@ const RenderedNotes = ({
                 alignItems: "center",
                 justifyContent: "center",
                 color: textColor,
-                fontSize: `${NOTE_HEIGHT - 1}px`,
+                fontSize: `${NOTE_HEIGHT}px`,
                 fontWeight: "bold",
-                fontFamily: "monospace",
                 boxShadow: haloEffect,
                 transition:
                   "box-shadow 0.1s ease-in-out, transform 0.1s ease-in-out",
                 transform,
               }}
             >
-              <span style={{ pointerEvents: "none", userSelect: "none" }}>
+              <span
+                style={{
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  transform: "translateY(-0.5px)",
+                }}
+              >
                 {displayText}
               </span>
             </div>
@@ -549,6 +554,37 @@ const NoteEditor = ({
       {/* Flexbox layout: Description (200px) + Grid (rest) */}
       <div style={{ display: "flex", gap: "100px" }}>
         {/* Description column - 200px fixed */}
+        <div style={{ width: "20em", flexShrink: 0 }}>
+          {isEditMode ? (
+            <textarea
+              value={score.description}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
+              style={{
+                width: "100%",
+                height: "100px",
+                backgroundColor: "#333",
+                color: "#fff",
+                border: "1px solid #666",
+                borderRadius: "4px",
+                padding: "8px",
+                fontSize: "14px",
+                resize: "vertical",
+              }}
+              placeholder="Enter description..."
+            />
+          ) : (
+            <div
+              style={{
+                color: "#fff",
+                fontSize: "16px",
+                lineHeight: "1.4",
+                wordWrap: "break-word",
+              }}
+            >
+              {score.description}
+            </div>
+          )}
+        </div>
 
         {/* Grid column - takes remaining space */}
         <div style={{ flex: 1 }}>
@@ -694,40 +730,6 @@ const NoteEditor = ({
             />
           </div>
         </div>
-
-        <div style={{ width: "200px", flexShrink: 0 }}>
-          {isEditMode ? (
-            <textarea
-              value={score.description}
-              onChange={(e) => handleDescriptionChange(e.target.value)}
-              style={{
-                width: "100%",
-                height: "100px",
-                backgroundColor: "#333",
-                color: "#fff",
-                border: "1px solid #666",
-                borderRadius: "4px",
-                padding: "8px",
-                fontFamily: "Quicksand, sans-serif",
-                fontSize: "14px",
-                resize: "vertical",
-              }}
-              placeholder="Enter description..."
-            />
-          ) : (
-            <div
-              style={{
-                color: "#fff",
-                fontSize: "16px",
-                fontFamily: "Quicksand, sans-serif",
-                lineHeight: "1.4",
-                wordWrap: "break-word",
-              }}
-            >
-              {score.description}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Add new score button */}
@@ -741,7 +743,6 @@ const NoteEditor = ({
             border: "1px solid #666",
             borderRadius: "4px",
             cursor: "pointer",
-            fontFamily: "Arial, sans-serif",
             fontSize: "14px",
             transition: "all 0.2s ease",
           }}

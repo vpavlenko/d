@@ -115,7 +115,6 @@ const MeasuresGrid = ({
             fontSize: "12px",
             fontWeight: "bold",
             zIndex: 3,
-            fontFamily: "sans-serif",
             pointerEvents: "none",
             userSelect: "none",
           }}
