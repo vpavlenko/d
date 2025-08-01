@@ -12,4 +12,5 @@ export type Note = {
 export type Score = {
   notes: Note[];
   tonic: PitchClass;
+  description: string;
 };

@@ -27,7 +27,27 @@ export const HEADER_HEIGHT = 20;
 
 const notes: Note[] = [{ start: 0, end: 0.25, pitch: 60 }];
 
-const score: Score = { notes, tonic: 0 };
+const scores: Score[] = [
+  { notes, tonic: 0, description: "First score" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+  { notes, tonic: 0, description: "Its bass line" },
+];
 
 // Scale degree mapping array
 const SCALE_DEGREES = [
@@ -597,37 +617,48 @@ function App() {
   return (
     <div
       style={{
+        backgroundColor: "black",
         display: "flex",
-        gap: "20px",
-        padding: "10px",
-        minHeight: "100vh",
-        fontFamily: "Arial, sans-serif",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
-      {/* Left column - NoteEditor */}
-      <div style={{ flex: "1" }}>
-        <NoteEditor score={score} />
-      </div>
-
-      {/* Right column - Welcome text */}
-      <div
-        style={{
-          flex: "1",
-          padding: "20px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-        }}
-      >
-        <h1
+      {scores.map((score) => (
+        <div
           style={{
-            marginBottom: "20px",
-            fontSize: "28px",
-            color: "#ffffff",
+            display: "flex",
+            gap: "20px",
+            padding: "10px",
+            fontFamily: "Arial, sans-serif",
           }}
         >
-          Welcome to D
-        </h1>
-      </div>
+          {/* Left column - NoteEditor */}
+          <div style={{ flex: "1" }}>
+            <NoteEditor score={score} />
+          </div>
+
+          {/* Right column - Welcome text */}
+          <div
+            style={{
+              flex: "1",
+              padding: "20px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div
+              style={{
+                marginBottom: "20px",
+                fontSize: "28px",
+                color: "#ffffff",
+              }}
+            >
+              {score.description}
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
