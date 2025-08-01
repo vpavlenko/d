@@ -206,7 +206,13 @@ const RenderedNotes = ({
   );
 };
 
-const NoteEditor = ({ score: initialScore }: { score: Score }) => {
+const NoteEditor = ({
+  score: initialScore,
+  onScoreChange,
+}: {
+  score: Score;
+  onScoreChange: (score: Score) => void;
+}) => {
   const { isPlaying, playingNotes, play, stop, playNote } = usePlayback();
   const [isEditMode, setIsEditMode] = useState(false);
   const [score, setScore] = useState(initialScore);
@@ -214,6 +220,11 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragNote, setDragNote] = useState<Note | null>(null);
   const [hoveredNoteIndex, setHoveredNoteIndex] = useState<number | null>(null);
+
+  // Update parent when score changes
+  useEffect(() => {
+    onScoreChange(score);
+  }, [score, onScoreChange]);
 
   // Reset hover state when edit mode is disabled
   useEffect(() => {
@@ -318,6 +329,13 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
     [score]
   );
 
+  const handleDescriptionChange = useCallback(
+    (newDescription: string) => {
+      setScore({ ...score, description: newDescription });
+    },
+    [score]
+  );
+
   const {
     measures,
     beats,
@@ -409,7 +427,7 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
   );
 
   return (
-    <div>
+    <div style={{ marginLeft: "30px" }}>
       {/* Control buttons */}
       <div style={{ marginBottom: "10px", display: "flex", gap: "8px" }}>
         <button
@@ -470,193 +488,219 @@ const NoteEditor = ({ score: initialScore }: { score: Score }) => {
         </button>
       </div>
 
-      <div
-        style={{
-          width: `${gridWidth}px`,
-          height: `${gridHeight}px`,
-          position: "relative",
-        }}
-      >
-        <Grid
-          measures={measures}
-          beats={beats}
-          secondToX={secondToX}
-          gridHeight={gridHeight}
-          gridWidth={gridWidth}
-          score={score}
-          pitchToY={pitchToY}
-          minPitch={minPitch}
-          maxPitch={maxPitch}
-        />
+      {/* Flexbox layout: Description (200px) + Grid (rest) */}
+      <div style={{ display: "flex", gap: "100px" }}>
+        {/* Description column - 200px fixed */}
 
-        {/* Hover overlay for edit mode */}
-        {isEditMode && (
+        {/* Grid column - takes remaining space */}
+        <div style={{ flex: 1 }}>
           <div
             style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
               width: `${gridWidth}px`,
               height: `${gridHeight}px`,
-              zIndex: 3,
-              cursor: isDragging ? "ew-resize" : "crosshair",
+              position: "relative",
             }}
-            onMouseDown={(e) => {
-              const { start, end, pitch } = quantizeMouseToMusic(
-                e,
-                e.currentTarget
-              );
+          >
+            <Grid
+              measures={measures}
+              beats={beats}
+              secondToX={secondToX}
+              gridHeight={gridHeight}
+              gridWidth={gridWidth}
+              score={score}
+              pitchToY={pitchToY}
+              minPitch={minPitch}
+              maxPitch={maxPitch}
+            />
 
-              // Play note sound when starting drag
-              playNote(pitch);
+            {/* Hover overlay for edit mode */}
+            {isEditMode && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: `${gridWidth}px`,
+                  height: `${gridHeight}px`,
+                  zIndex: 3,
+                  cursor: isDragging ? "ew-resize" : "crosshair",
+                }}
+                onMouseDown={(e) => {
+                  const { start, end, pitch } = quantizeMouseToMusic(
+                    e,
+                    e.currentTarget
+                  );
 
-              // Start dragging - create initial note with fixed pitch and start
-              const initialNote: Note = {
-                start,
-                end,
-                pitch,
-                state: "adding",
-              };
+                  // Play note sound when starting drag
+                  playNote(pitch);
 
-              setIsDragging(true);
-              setDragNote(initialNote);
-              setHoverNote(null);
-            }}
-            onMouseMove={(e) => {
-              if (isDragging && dragNote) {
-                // During drag: only update end position with fine quantization
-                const { end: newEnd } = quantizeMouseToMusic(
-                  e,
-                  e.currentTarget
-                );
-
-                // Ensure end is not before start
-                const finalEnd = Math.max(newEnd, dragNote.start + 0.0625); // Minimum 16th note length
-
-                const updatedDragNote: Note = {
-                  ...dragNote,
-                  end: finalEnd,
-                };
-                setDragNote(updatedDragNote);
-              } else {
-                // Normal hover behavior when not dragging
-                const { start, end, pitch } = quantizeMouseToMusic(
-                  e,
-                  e.currentTarget
-                );
-
-                // Only update if the note properties have actually changed
-                if (
-                  !hoverNote ||
-                  hoverNote.start !== start ||
-                  hoverNote.end !== end ||
-                  hoverNote.pitch !== pitch
-                ) {
-                  const newHoverNote: Note = {
+                  // Start dragging - create initial note with fixed pitch and start
+                  const initialNote: Note = {
                     start,
                     end,
                     pitch,
                     state: "adding",
                   };
-                  setHoverNote(newHoverNote);
-                }
-              }
-            }}
-            onMouseUp={() => {
-              if (isDragging && dragNote) {
-                // Finalize the note - add it to the score
-                const newNotes = [
-                  ...score.notes,
-                  {
-                    start: dragNote.start,
-                    end: dragNote.end,
-                    pitch: dragNote.pitch,
-                  },
-                ];
-                setScore({ ...score, notes: newNotes });
 
-                // Reset drag state
-                setIsDragging(false);
-                setDragNote(null);
-                setHoverNote(null);
-              }
-            }}
-            onMouseLeave={() => {
-              if (!isDragging) {
-                setHoverNote(null);
-              }
-            }}
-          />
-        )}
+                  setIsDragging(true);
+                  setDragNote(initialNote);
+                  setHoverNote(null);
+                }}
+                onMouseMove={(e) => {
+                  if (isDragging && dragNote) {
+                    // During drag: only update end position with fine quantization
+                    const { end: newEnd } = quantizeMouseToMusic(
+                      e,
+                      e.currentTarget
+                    );
 
-        <RenderedNotes
-          score={{
-            ...score,
-            notes: dragNote
-              ? [...score.notes, dragNote]
-              : hoverNote
-              ? [...score.notes, hoverNote]
-              : score.notes,
-          }}
-          secondToX={secondToX}
-          pitchToY={pitchToY}
-          playingNotes={playingNotes}
-          onNoteClick={handleNoteClick}
-          isEditMode={isEditMode}
-          playNote={playNote}
-          onNoteDelete={handleNoteDelete}
-          hoveredNoteIndex={hoveredNoteIndex}
-          onNoteHover={setHoveredNoteIndex}
-        />
+                    // Ensure end is not before start
+                    const finalEnd = Math.max(newEnd, dragNote.start + 0.0625); // Minimum 16th note length
+
+                    const updatedDragNote: Note = {
+                      ...dragNote,
+                      end: finalEnd,
+                    };
+                    setDragNote(updatedDragNote);
+                  } else {
+                    // Normal hover behavior when not dragging
+                    const { start, end, pitch } = quantizeMouseToMusic(
+                      e,
+                      e.currentTarget
+                    );
+
+                    // Only update if the note properties have actually changed
+                    if (
+                      !hoverNote ||
+                      hoverNote.start !== start ||
+                      hoverNote.end !== end ||
+                      hoverNote.pitch !== pitch
+                    ) {
+                      const newHoverNote: Note = {
+                        start,
+                        end,
+                        pitch,
+                        state: "adding",
+                      };
+                      setHoverNote(newHoverNote);
+                    }
+                  }
+                }}
+                onMouseUp={() => {
+                  if (isDragging && dragNote) {
+                    // Finalize the note - add it to the score
+                    const newNotes = [
+                      ...score.notes,
+                      {
+                        start: dragNote.start,
+                        end: dragNote.end,
+                        pitch: dragNote.pitch,
+                      },
+                    ];
+                    setScore({ ...score, notes: newNotes });
+
+                    // Reset drag state
+                    setIsDragging(false);
+                    setDragNote(null);
+                    setHoverNote(null);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (!isDragging) {
+                    setHoverNote(null);
+                  }
+                }}
+              />
+            )}
+
+            <RenderedNotes
+              score={{
+                ...score,
+                notes: dragNote
+                  ? [...score.notes, dragNote]
+                  : hoverNote
+                  ? [...score.notes, hoverNote]
+                  : score.notes,
+              }}
+              secondToX={secondToX}
+              pitchToY={pitchToY}
+              playingNotes={playingNotes}
+              onNoteClick={handleNoteClick}
+              isEditMode={isEditMode}
+              playNote={playNote}
+              onNoteDelete={handleNoteDelete}
+              hoveredNoteIndex={hoveredNoteIndex}
+              onNoteHover={setHoveredNoteIndex}
+            />
+          </div>
+        </div>
+
+        <div style={{ width: "200px", flexShrink: 0 }}>
+          {isEditMode ? (
+            <textarea
+              value={score.description}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
+              style={{
+                width: "100%",
+                height: "100px",
+                backgroundColor: "#333",
+                color: "#fff",
+                border: "1px solid #666",
+                borderRadius: "4px",
+                padding: "8px",
+                fontFamily: "Arial, sans-serif",
+                fontSize: "14px",
+                resize: "vertical",
+              }}
+              placeholder="Enter description..."
+            />
+          ) : (
+            <div
+              style={{
+                color: "#fff",
+                fontSize: "16px",
+                fontFamily: "Arial, sans-serif",
+                lineHeight: "1.4",
+                wordWrap: "break-word",
+              }}
+            >
+              {score.description}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 function App() {
+  const [appScores, setAppScores] = useState(scores);
+
+  const handleScoreChange = useCallback(
+    (index: number) => (updatedScore: Score) => {
+      setAppScores((prev) =>
+        prev.map((score, i) => (i === index ? updatedScore : score))
+      );
+    },
+    []
+  );
+
   return (
     <div
       style={{
         backgroundColor: "black",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
+        padding: "20px",
+        gap: "20px",
       }}
     >
-      {scores.map((score) => (
+      {appScores.map((score, index) => (
         <div
-          style={{
-            display: "flex",
-            gap: "20px",
-            padding: "10px",
-            fontFamily: "Arial, sans-serif",
-          }}
+          key={index}
+          style={{ display: "flex", justifyContent: "flex-start" }}
         >
-          {/* Left column - NoteEditor */}
-          <div style={{ flex: "1" }}>
-            <NoteEditor score={score} />
-          </div>
-
-          {/* Right column - Welcome text */}
-          <div
-            style={{
-              flex: "1",
-              padding: "20px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-            }}
-          >
-            <div
-              style={{
-                marginBottom: "20px",
-                fontSize: "28px",
-                color: "#ffffff",
-              }}
-            >
-              {score.description}
-            </div>
-          </div>
+          <NoteEditor score={score} onScoreChange={handleScoreChange(index)} />
         </div>
       ))}
     </div>
