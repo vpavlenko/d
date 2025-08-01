@@ -1197,6 +1197,279 @@ export const defaultScores: VersionedScores = {
       notes: [
         {
           start: 1,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1,
+          end: 2,
+          pitch: 57,
+        },
+        {
+          start: 1,
+          end: 2,
+          pitch: 61,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 54,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 57,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 49,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 56,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 59,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 52,
+        },
+      ],
+      tonic: 9,
+      description:
+        "Yiruma doesn't use the dreamy chords as above. He plays three notes instead of four",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.0625,
+          end: 2,
+          pitch: 57,
+        },
+        {
+          start: 1.125,
+          end: 2,
+          pitch: 61,
+        },
+        {
+          start: 1.1875,
+          end: 2,
+          pitch: 66,
+        },
+        {
+          start: 1.25,
+          end: 2,
+          pitch: 69,
+        },
+        {
+          start: 1.3125,
+          end: 2,
+          pitch: 73,
+        },
+        {
+          start: 1.375,
+          end: 2,
+          pitch: 78,
+        },
+        {
+          start: 1.4375,
+          end: 2,
+          pitch: 81,
+        },
+        {
+          start: 1.5,
+          end: 2,
+          pitch: 85,
+        },
+        {
+          start: 1.5625,
+          end: 2,
+          pitch: 90,
+        },
+        {
+          start: 2.0625,
+          end: 3,
+          pitch: 54,
+        },
+        {
+          start: 2.125,
+          end: 3,
+          pitch: 57,
+        },
+        {
+          start: 2.1875,
+          end: 3,
+          pitch: 62,
+        },
+        {
+          start: 2.25,
+          end: 3,
+          pitch: 66,
+        },
+        {
+          start: 2.3125,
+          end: 3,
+          pitch: 69,
+        },
+        {
+          start: 2.375,
+          end: 3,
+          pitch: 74,
+        },
+        {
+          start: 2.4375,
+          end: 3,
+          pitch: 78,
+        },
+        {
+          start: 2.5,
+          end: 3,
+          pitch: 81,
+        },
+        {
+          start: 2.5625,
+          end: 3,
+          pitch: 86,
+        },
+        {
+          start: 4.0625,
+          end: 5,
+          pitch: 56,
+        },
+        {
+          start: 4.125,
+          end: 5,
+          pitch: 59,
+        },
+        {
+          start: 4.1875,
+          end: 5,
+          pitch: 64,
+        },
+        {
+          start: 4.25,
+          end: 5,
+          pitch: 68,
+        },
+        {
+          start: 4.3125,
+          end: 5,
+          pitch: 71,
+        },
+        {
+          start: 4.375,
+          end: 5,
+          pitch: 76,
+        },
+        {
+          start: 4.4375,
+          end: 5,
+          pitch: 80,
+        },
+        {
+          start: 4.5,
+          end: 5,
+          pitch: 83,
+        },
+        {
+          start: 4.5625,
+          end: 5,
+          pitch: 88,
+        },
+        {
+          start: 3.0625,
+          end: 4,
+          pitch: 49,
+        },
+        {
+          start: 3.125,
+          end: 4,
+          pitch: 52,
+        },
+        {
+          start: 3.1875,
+          end: 4,
+          pitch: 57,
+        },
+        {
+          start: 3.25,
+          end: 4,
+          pitch: 61,
+        },
+        {
+          start: 3.3125,
+          end: 4,
+          pitch: 64,
+        },
+        {
+          start: 3.375,
+          end: 4,
+          pitch: 69,
+        },
+        {
+          start: 3.4375,
+          end: 4,
+          pitch: 73,
+        },
+        {
+          start: 3.5,
+          end: 4,
+          pitch: 76,
+        },
+        {
+          start: 3.5625,
+          end: 4,
+          pitch: 81,
+        },
+      ],
+      tonic: 9,
+      description: "You can layer colors in many octaves",
+    },
+    {
+      notes: [
+        {
+          start: 1,
           end: 1.25,
           pitch: 54,
         },
@@ -1278,7 +1551,7 @@ export const defaultScores: VersionedScores = {
       ],
       tonic: 9,
       description:
-        "Now let's play the first three notes of each chord sequentially, is some repeating pattern. Doing anything like that is called arpeggio",
+        "Now let's play the first three notes of each chord sequentially, is some repeating pattern",
     },
     {
       notes: [
@@ -1367,6 +1640,1130 @@ export const defaultScores: VersionedScores = {
       description:
         "Actually, Yiruma plays it a bit differently, with more freedom and creativity, if you like",
     },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+        {
+          start: 1,
+          end: 2,
+          pitch: 81,
+        },
+        {
+          start: 2,
+          end: 3,
+          pitch: 81,
+        },
+        {
+          start: 3,
+          end: 4,
+          pitch: 81,
+        },
+        {
+          start: 4,
+          end: 5,
+          pitch: 80,
+        },
+      ],
+      tonic: 9,
+      description:
+        "Ok, now the melody. The most important notes in the melody are the downbeats - at the start of every measure. They should be from the chord so that the chord and the melody work together",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+        {
+          start: 0.875,
+          end: 1,
+          pitch: 80,
+        },
+        {
+          start: 1,
+          end: 1.5,
+          pitch: 81,
+        },
+        {
+          start: 1.875,
+          end: 2,
+          pitch: 80,
+        },
+        {
+          start: 2,
+          end: 2.5,
+          pitch: 81,
+        },
+        {
+          start: 2.875,
+          end: 3,
+          pitch: 80,
+        },
+        {
+          start: 3,
+          end: 3.5,
+          pitch: 81,
+        },
+        {
+          start: 3.875,
+          end: 4,
+          pitch: 78,
+        },
+        {
+          start: 4,
+          end: 4.5,
+          pitch: 80,
+        },
+      ],
+      tonic: 9,
+      description: "How to approach the notes? We can approach them from below",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+        {
+          start: 1,
+          end: 1.5,
+          pitch: 81,
+        },
+        {
+          start: 2,
+          end: 2.5,
+          pitch: 81,
+        },
+        {
+          start: 3,
+          end: 3.5,
+          pitch: 81,
+        },
+        {
+          start: 4,
+          end: 4.5,
+          pitch: 80,
+        },
+        {
+          start: 0.875,
+          end: 1,
+          pitch: 83,
+        },
+        {
+          start: 1.875,
+          end: 2,
+          pitch: 83,
+        },
+        {
+          start: 2.875,
+          end: 3,
+          pitch: 83,
+        },
+        {
+          start: 3.875,
+          end: 4,
+          pitch: 81,
+        },
+      ],
+      tonic: 9,
+      description: "Or from above",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+        {
+          start: 1,
+          end: 1.5,
+          pitch: 81,
+        },
+        {
+          start: 2,
+          end: 2.5,
+          pitch: 81,
+        },
+        {
+          start: 3,
+          end: 3.5,
+          pitch: 81,
+        },
+        {
+          start: 4,
+          end: 4.5,
+          pitch: 80,
+        },
+        {
+          start: 0.75,
+          end: 0.875,
+          pitch: 81,
+        },
+        {
+          start: 0.875,
+          end: 1,
+          pitch: 80,
+        },
+        {
+          start: 1.75,
+          end: 1.875,
+          pitch: 81,
+        },
+        {
+          start: 1.875,
+          end: 2,
+          pitch: 80,
+        },
+        {
+          start: 2.75,
+          end: 2.875,
+          pitch: 81,
+        },
+        {
+          start: 2.875,
+          end: 3,
+          pitch: 80,
+        },
+        {
+          start: 3.75,
+          end: 3.875,
+          pitch: 80,
+        },
+        {
+          start: 3.875,
+          end: 4,
+          pitch: 78,
+        },
+      ],
+      tonic: 9,
+      description: "We can use a note → lower neighbor → note idea",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+        {
+          start: 1,
+          end: 1.5,
+          pitch: 81,
+        },
+        {
+          start: 2,
+          end: 2.5,
+          pitch: 81,
+        },
+        {
+          start: 3,
+          end: 3.5,
+          pitch: 81,
+        },
+        {
+          start: 4,
+          end: 4.5,
+          pitch: 80,
+        },
+        {
+          start: 0.75,
+          end: 0.875,
+          pitch: 81,
+        },
+        {
+          start: 0.875,
+          end: 1,
+          pitch: 80,
+        },
+        {
+          start: 1.75,
+          end: 1.875,
+          pitch: 81,
+        },
+        {
+          start: 1.875,
+          end: 2,
+          pitch: 80,
+        },
+        {
+          start: 2.75,
+          end: 2.875,
+          pitch: 81,
+        },
+        {
+          start: 2.875,
+          end: 3,
+          pitch: 80,
+        },
+        {
+          start: 3.75,
+          end: 3.875,
+          pitch: 80,
+        },
+        {
+          start: 3.875,
+          end: 4,
+          pitch: 78,
+        },
+        {
+          start: 0.5,
+          end: 0.625,
+          pitch: 81,
+        },
+        {
+          start: 0.625,
+          end: 0.75,
+          pitch: 83,
+        },
+        {
+          start: 1.5,
+          end: 1.625,
+          pitch: 81,
+        },
+        {
+          start: 1.625,
+          end: 1.75,
+          pitch: 83,
+        },
+        {
+          start: 2.5,
+          end: 2.625,
+          pitch: 81,
+        },
+        {
+          start: 2.625,
+          end: 2.75,
+          pitch: 83,
+        },
+        {
+          start: 3.5,
+          end: 3.625,
+          pitch: 80,
+        },
+        {
+          start: 3.625,
+          end: 3.75,
+          pitch: 81,
+        },
+      ],
+      tonic: 9,
+      description: "Or we can employ both lower and upper neighbors",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+        {
+          start: 1,
+          end: 1.5,
+          pitch: 81,
+        },
+        {
+          start: 2,
+          end: 2.5,
+          pitch: 81,
+        },
+        {
+          start: 4,
+          end: 4.5,
+          pitch: 80,
+        },
+        {
+          start: 0.75,
+          end: 0.875,
+          pitch: 81,
+        },
+        {
+          start: 0.875,
+          end: 1,
+          pitch: 80,
+        },
+        {
+          start: 1.75,
+          end: 1.875,
+          pitch: 81,
+        },
+        {
+          start: 1.875,
+          end: 2,
+          pitch: 80,
+        },
+        {
+          start: 2.75,
+          end: 2.875,
+          pitch: 81,
+        },
+        {
+          start: 2.875,
+          end: 3,
+          pitch: 80,
+        },
+        {
+          start: 0.5,
+          end: 0.625,
+          pitch: 81,
+        },
+        {
+          start: 0.625,
+          end: 0.75,
+          pitch: 83,
+        },
+        {
+          start: 1.5,
+          end: 1.625,
+          pitch: 81,
+        },
+        {
+          start: 1.625,
+          end: 1.75,
+          pitch: 83,
+        },
+        {
+          start: 2.5,
+          end: 2.625,
+          pitch: 81,
+        },
+        {
+          start: 2.625,
+          end: 2.75,
+          pitch: 83,
+        },
+        {
+          start: 3,
+          end: 3.125,
+          pitch: 81,
+        },
+        {
+          start: 3.125,
+          end: 3.25,
+          pitch: 83,
+        },
+        {
+          start: 3.25,
+          end: 3.375,
+          pitch: 85,
+        },
+        {
+          start: 3.375,
+          end: 3.5,
+          pitch: 86,
+        },
+        {
+          start: 3.5,
+          end: 3.625,
+          pitch: 88,
+        },
+        {
+          start: 3.625,
+          end: 3.75,
+          pitch: 85,
+        },
+        {
+          start: 3.75,
+          end: 3.875,
+          pitch: 83,
+        },
+        {
+          start: 3.875,
+          end: 4,
+          pitch: 81,
+        },
+      ],
+      tonic: 9,
+      description:
+        "Yiruma chooses to build a smooth hill from 1 to 7 using the scale",
+    },
+    {
+      notes: [
+        {
+          start: 1,
+          end: 1.25,
+          pitch: 54,
+        },
+        {
+          start: 1.25,
+          end: 1.5,
+          pitch: 61,
+        },
+        {
+          start: 1.75,
+          end: 2,
+          pitch: 54,
+        },
+        {
+          start: 2.25,
+          end: 2.5,
+          pitch: 57,
+        },
+        {
+          start: 2,
+          end: 2.25,
+          pitch: 50,
+        },
+        {
+          start: 2.75,
+          end: 3,
+          pitch: 50,
+        },
+        {
+          start: 3,
+          end: 3.25,
+          pitch: 45,
+        },
+        {
+          start: 3.25,
+          end: 3.5,
+          pitch: 52,
+        },
+        {
+          start: 3.5,
+          end: 3.75,
+          pitch: 61,
+        },
+        {
+          start: 3.75,
+          end: 4,
+          pitch: 45,
+        },
+        {
+          start: 4,
+          end: 4.25,
+          pitch: 52,
+        },
+        {
+          start: 4.25,
+          end: 4.5,
+          pitch: 59,
+        },
+        {
+          start: 4.75,
+          end: 5,
+          pitch: 52,
+        },
+        {
+          start: 1.5,
+          end: 1.75,
+          pitch: 66,
+        },
+        {
+          start: 2.5,
+          end: 2.75,
+          pitch: 64,
+        },
+        {
+          start: 4.5,
+          end: 4.75,
+          pitch: 64,
+        },
+        {
+          start: 4,
+          end: 4.5,
+          pitch: 80,
+        },
+        {
+          start: 3,
+          end: 3.125,
+          pitch: 81,
+        },
+        {
+          start: 3.125,
+          end: 3.25,
+          pitch: 83,
+        },
+        {
+          start: 3.25,
+          end: 3.375,
+          pitch: 85,
+        },
+        {
+          start: 3.375,
+          end: 3.5,
+          pitch: 86,
+        },
+        {
+          start: 3.5,
+          end: 3.625,
+          pitch: 88,
+        },
+        {
+          start: 3.625,
+          end: 3.75,
+          pitch: 85,
+        },
+        {
+          start: 3.75,
+          end: 3.875,
+          pitch: 83,
+        },
+        {
+          start: 3.875,
+          end: 4,
+          pitch: 81,
+        },
+        {
+          start: 1,
+          end: 1.125,
+          pitch: 81,
+        },
+        {
+          start: 1.125,
+          end: 1.25,
+          pitch: 83,
+        },
+        {
+          start: 1.25,
+          end: 1.375,
+          pitch: 85,
+        },
+        {
+          start: 1.375,
+          end: 1.5,
+          pitch: 86,
+        },
+        {
+          start: 1.5,
+          end: 1.625,
+          pitch: 88,
+        },
+        {
+          start: 1.625,
+          end: 1.75,
+          pitch: 86,
+        },
+        {
+          start: 1.75,
+          end: 1.875,
+          pitch: 85,
+        },
+        {
+          start: 1.875,
+          end: 2,
+          pitch: 83,
+        },
+        {
+          start: 0.5,
+          end: 0.625,
+          pitch: 88,
+        },
+        {
+          start: 0.625,
+          end: 0.75,
+          pitch: 86,
+        },
+        {
+          start: 0.75,
+          end: 0.875,
+          pitch: 85,
+        },
+        {
+          start: 0.875,
+          end: 1,
+          pitch: 83,
+        },
+        {
+          start: 2,
+          end: 2.125,
+          pitch: 81,
+        },
+        {
+          start: 2.125,
+          end: 2.25,
+          pitch: 83,
+        },
+        {
+          start: 2.25,
+          end: 2.375,
+          pitch: 85,
+        },
+        {
+          start: 2.375,
+          end: 2.5,
+          pitch: 86,
+        },
+        {
+          start: 2.5,
+          end: 2.625,
+          pitch: 88,
+        },
+        {
+          start: 2.625,
+          end: 2.75,
+          pitch: 86,
+        },
+        {
+          start: 2.75,
+          end: 2.875,
+          pitch: 85,
+        },
+        {
+          start: 2.875,
+          end: 3,
+          pitch: 83,
+        },
+      ],
+      tonic: 9,
+      description: "Could he do hills all the way?",
+    },
   ],
-  version: 1871,
+  version: 2909,
 };
