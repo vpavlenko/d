@@ -4,6 +4,7 @@ import { usePlayback } from "./usePlayback";
 import { Grid } from "./Grid";
 import type { Note, Score } from "./types";
 import { useScoreStorage } from "./scoreStorage";
+import { SplashScreen } from "./SplashScreen";
 
 // Check if we should show editing/storage UI
 const shouldShowEditingUI = (): boolean => {
@@ -840,6 +841,7 @@ function App() {
     stop,
     playNote,
     samplerInitialized,
+    loadingProgress,
   } = usePlayback();
 
   // Check if we should show editing UI
@@ -847,46 +849,7 @@ function App() {
 
   // Show loading screen while Tone.js samples are loading
   if (!samplerInitialized) {
-    return (
-      <div
-        style={{
-          backgroundColor: "black",
-          color: "white",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          fontFamily: "monospace",
-          gap: "20px",
-        }}
-      >
-        <div style={{ fontSize: "24px", color: "#ccc" }}>
-          Loading Tone.js...
-        </div>
-        <div
-          style={{
-            fontSize: "16px",
-            color: "#999",
-            textAlign: "center",
-            maxWidth: "600px",
-          }}
-        >
-          <div>🎹 Initializing Salamander Grand Piano samples</div>
-          <div style={{ marginTop: "10px", fontSize: "14px" }}>
-            Loading audio samples from: tonejs.github.io/audio/salamander/
-          </div>
-          <div style={{ marginTop: "10px", fontSize: "12px", opacity: 0.7 }}>
-            This may take a few seconds depending on your connection...
-          </div>
-        </div>
-        <div style={{ fontSize: "14px", color: "#666" }}>
-          <div>Tone.js Audio Context: Initializing</div>
-          <div>Sample Library: Salamander Grand Piano</div>
-          <div>Sample Count: ~30 audio files</div>
-        </div>
-      </div>
-    );
+    return <SplashScreen loadingProgress={loadingProgress} />;
   }
 
   return (
