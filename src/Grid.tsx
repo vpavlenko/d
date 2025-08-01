@@ -1,5 +1,5 @@
 import type { Score } from "./types";
-import { NOTE_HEIGHT } from "./App";
+import { NOTE_HEIGHT } from "./RenderedNotes";
 
 const OctaveGrid = ({
   score,
