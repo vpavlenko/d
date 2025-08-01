@@ -2,6 +2,15 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import * as Tone from "tone";
 import type { Score } from "./types";
 
+// Global BPM constant for playback tempo
+const PLAYBACK_BPM = 100;
+const REFERENCE_BPM = 240; // BPM that score seconds were originally designed for
+
+// Convert score seconds to real playback seconds based on BPM
+const scoreSecondsToRealSeconds = (scoreSeconds: number): number => {
+  return scoreSeconds * (REFERENCE_BPM / PLAYBACK_BPM);
+};
+
 // Custom hook for playback functionality
 export const usePlayback = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -90,18 +99,22 @@ export const usePlayback = () => {
 
         // Schedule all notes using Transport.schedule for precise timing
         score.notes.forEach((note, noteIndex) => {
+          // Convert score time to real playback time
+          const realStartTime = scoreSecondsToRealSeconds(note.start);
+          const realEndTime = scoreSecondsToRealSeconds(note.end);
+
           // Schedule note start
           const startEventId = Tone.Transport.schedule((time) => {
             // Convert MIDI number to note name
             const noteName = Tone.Frequency(note.pitch, "midi").toNote();
-            const duration = note.end - note.start;
+            const duration = realEndTime - realStartTime;
 
             // Trigger note with duration
             sampler.triggerAttackRelease(noteName, duration, time, 0.8);
 
             // Update UI to show this note is playing
             setPlayingNotes((prev) => new Set([...prev, noteIndex]));
-          }, `${note.start}`);
+          }, `${realStartTime}`);
 
           // Schedule note end (for UI only, audio handled by triggerAttackRelease)
           const endEventId = Tone.Transport.schedule(() => {
@@ -111,17 +124,20 @@ export const usePlayback = () => {
               newSet.delete(noteIndex);
               return newSet;
             });
-          }, `${note.end}`);
+          }, `${realEndTime}`);
 
           scheduledEventsRef.current.push(startEventId, endEventId);
         });
 
         // Schedule transport stop at the end
-        const maxEndTime = Math.max(...score.notes.map((note) => note.end));
+        const maxScoreEndTime = Math.max(
+          ...score.notes.map((note) => note.end)
+        );
+        const maxRealEndTime = scoreSecondsToRealSeconds(maxScoreEndTime);
         const stopEventId = Tone.Transport.schedule(() => {
           setIsPlaying(false);
           setPlayingNotes(new Set());
-        }, `${maxEndTime + 0.1}`); // Small buffer to ensure all notes finish
+        }, `${maxRealEndTime + 0.1}`); // Small buffer to ensure all notes finish
 
         scheduledEventsRef.current.push(stopEventId);
 
