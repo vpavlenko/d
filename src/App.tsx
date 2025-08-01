@@ -881,51 +881,44 @@ function App() {
         );
       })}
 
-      {/* Footer with copy button */}
-      <div
+      {/* Copy button */}
+      <button
+        onClick={copyScoresAsJson}
         style={{
-          marginTop: "40px",
-          paddingTop: "20px",
-          borderTop: "1px solid #333",
+          position: "fixed",
+          bottom: "70px",
+          right: "20px",
           display: "flex",
-          justifyContent: "center",
           alignItems: "center",
-          gap: "10px",
+          gap: "8px",
+          padding: "10px 16px",
+          backgroundColor: copySuccess ? "#333" : "transparent",
+          color: copySuccess ? "#fff" : "#ccc",
+          border: "1px solid #666",
+          borderRadius: "4px",
+          cursor: "pointer",
+          fontFamily: "Arial, sans-serif",
+          fontSize: "14px",
+          zIndex: 1000,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+          transition: "all 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          if (!copySuccess) {
+            e.currentTarget.style.color = "#fff";
+            e.currentTarget.style.borderColor = "#999";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!copySuccess) {
+            e.currentTarget.style.color = "#ccc";
+            e.currentTarget.style.borderColor = "#666";
+          }
         }}
       >
-        <button
-          onClick={copyScoresAsJson}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "10px 16px",
-            backgroundColor: copySuccess ? "#333" : "transparent",
-            color: copySuccess ? "#fff" : "#ccc",
-            border: "1px solid #666",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontFamily: "Arial, sans-serif",
-            fontSize: "14px",
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            if (!copySuccess) {
-              e.currentTarget.style.color = "#fff";
-              e.currentTarget.style.borderColor = "#999";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!copySuccess) {
-              e.currentTarget.style.color = "#ccc";
-              e.currentTarget.style.borderColor = "#666";
-            }
-          }}
-        >
-          <Copy size={16} />
-          {copySuccess ? "Copied!" : "Copy All Scores as JSON"}
-        </button>
-      </div>
+        <Copy size={16} />
+        {copySuccess ? "Copied!" : "Copy All Scores as JSON"}
+      </button>
 
       {/* Version display */}
       <div
