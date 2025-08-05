@@ -160,7 +160,7 @@ export const useScoreStorage = (): ScoreStorageHook => {
           cursor: "pointer",
           fontSize: "14px",
           zIndex: 1000,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+          boxShadow: "0 2px 8px rgba(255,255,255,0.3)",
           transition: "all 0.2s ease",
         }}
         onMouseEnter={(e) => {
@@ -193,7 +193,7 @@ export const useScoreStorage = (): ScoreStorageHook => {
           border: "1px solid #666",
           fontSize: "12px",
           zIndex: 1000,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+          boxShadow: "0 2px 8px rgba(255,255,255,0.3)",
         }}
       >
         v{versionedScores.version} ({scoresOrigin})

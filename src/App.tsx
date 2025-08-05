@@ -399,9 +399,9 @@ const NoteEditor = forwardRef<
                   style={{
                     width: "100%",
                     height: "100px",
-                    backgroundColor: "#333",
+                    backgroundColor: "#999",
                     color: "#fff",
-                    border: "1px solid #666",
+                    border: "1px solid #999",
                     borderRadius: "4px",
                     padding: "8px",
                     fontSize: "14px",
@@ -412,7 +412,7 @@ const NoteEditor = forwardRef<
               ) : (
                 <div
                   style={{
-                    color: "#fff",
+                    color: "#000",
                     fontSize: "16px",
                     lineHeight: "1.4",
                     wordWrap: "break-word",
@@ -442,7 +442,7 @@ const NoteEditor = forwardRef<
                   justifyContent: "center",
                   padding: "8px 18px",
                   backgroundColor: "transparent",
-                  color: "#888",
+                  color: "#777",
                   border: "none",
                   cursor: "pointer",
                   transition: "color 0.2s ease",
@@ -452,7 +452,7 @@ const NoteEditor = forwardRef<
                   e.currentTarget.style.color = "#fff";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#888";
+                  e.currentTarget.style.color = "#777";
                 }}
               >
                 {isPlaying ? <Square size={20} /> : <Play size={20} />}
@@ -621,7 +621,7 @@ const NoteEditor = forwardRef<
                   justifyContent: "center",
                   padding: "8px 18px",
                   backgroundColor: isEditMode ? "#fff" : "transparent",
-                  color: isEditMode ? "#000" : "#888",
+                  color: isEditMode ? "#fff" : "#777",
                   border: "none",
                   cursor: "pointer",
                   borderRadius: "4px",
@@ -630,8 +630,8 @@ const NoteEditor = forwardRef<
                 }}
                 onMouseEnter={(e) => {
                   if (isEditMode) {
-                    e.currentTarget.style.backgroundColor = "#ccc";
-                    e.currentTarget.style.color = "#000";
+                    e.currentTarget.style.backgroundColor = "#333";
+                    e.currentTarget.style.color = "#fff";
                   } else {
                     e.currentTarget.style.color = "#fff";
                   }
@@ -639,9 +639,9 @@ const NoteEditor = forwardRef<
                 onMouseLeave={(e) => {
                   if (isEditMode) {
                     e.currentTarget.style.backgroundColor = "#fff";
-                    e.currentTarget.style.color = "#000";
+                    e.currentTarget.style.color = "#fff";
                   } else {
-                    e.currentTarget.style.color = "#888";
+                    e.currentTarget.style.color = "#777";
                   }
                 }}
               >
@@ -669,7 +669,7 @@ const NoteEditor = forwardRef<
                       height: "100px",
                       backgroundColor: "#333",
                       color: "#fff",
-                      border: "1px solid #666",
+                      border: "1px solid #999",
                       borderRadius: "4px",
                       padding: "8px",
                       fontSize: "14px",
@@ -710,7 +710,7 @@ const NoteEditor = forwardRef<
                     justifyContent: "center",
                     padding: "0 18px",
                     backgroundColor: "transparent",
-                    color: "#888",
+                    color: "#777",
                     border: "none",
                     cursor: "pointer",
                     transition: "color 0.2s ease",
@@ -720,7 +720,7 @@ const NoteEditor = forwardRef<
                     e.currentTarget.style.color = "#fff";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.color = "#888";
+                    e.currentTarget.style.color = "#777";
                   }}
                 >
                   {isPlaying ? <Square size={20} /> : <Play size={20} />}
@@ -735,7 +735,7 @@ const NoteEditor = forwardRef<
                     justifyContent: "center",
                     padding: "0 18px",
                     backgroundColor: isEditMode ? "#fff" : "transparent",
-                    color: isEditMode ? "#000" : "#888",
+                    color: isEditMode ? "#fff" : "#777",
                     border: "none",
                     cursor: "pointer",
                     borderRadius: "4px",
@@ -744,8 +744,8 @@ const NoteEditor = forwardRef<
                   }}
                   onMouseEnter={(e) => {
                     if (isEditMode) {
-                      e.currentTarget.style.backgroundColor = "#ccc";
-                      e.currentTarget.style.color = "#000";
+                      e.currentTarget.style.backgroundColor = "#333";
+                      e.currentTarget.style.color = "#fff";
                     } else {
                       e.currentTarget.style.color = "#fff";
                     }
@@ -753,9 +753,9 @@ const NoteEditor = forwardRef<
                   onMouseLeave={(e) => {
                     if (isEditMode) {
                       e.currentTarget.style.backgroundColor = "#fff";
-                      e.currentTarget.style.color = "#000";
+                      e.currentTarget.style.color = "#fff";
                     } else {
-                      e.currentTarget.style.color = "#888";
+                      e.currentTarget.style.color = "#777";
                     }
                   }}
                 >
@@ -922,8 +922,8 @@ const NoteEditor = forwardRef<
               style={{
                 padding: "8px 16px",
                 backgroundColor: "transparent",
-                color: "#ccc",
-                border: "1px solid #666",
+                color: "#333",
+                border: "1px solid #999",
                 borderRadius: "4px",
                 cursor: "pointer",
                 fontSize: "14px",
@@ -934,8 +934,8 @@ const NoteEditor = forwardRef<
                 e.currentTarget.style.borderColor = "#999";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = "#ccc";
-                e.currentTarget.style.borderColor = "#666";
+                e.currentTarget.style.color = "#333";
+                e.currentTarget.style.borderColor = "#999";
               }}
             >
               Add a new score
@@ -1005,8 +1005,8 @@ function App() {
     return (
       <div
         style={{
-          backgroundColor: "black",
-          color: "white",
+          backgroundColor: "white",
+          color: "black",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -1020,7 +1020,7 @@ function App() {
       >
         <Piano size={120} color="#fff" />
         <div style={{ fontSize: "32px", fontWeight: "bold" }}>Let's play</div>
-        <div style={{ fontSize: "16px", color: "#ccc" }}>
+        <div style={{ fontSize: "16px", color: "#333" }}>
           Click anywhere to enable audio
         </div>
       </div>
@@ -1030,7 +1030,7 @@ function App() {
   return (
     <div
       style={{
-        backgroundColor: "black",
+        backgroundColor: "white",
         display: "flex",
         flexDirection: "column",
         gap: "20px",

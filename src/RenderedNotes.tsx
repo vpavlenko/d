@@ -2,14 +2,14 @@ import { useMemo } from "react";
 import type { Note, Score } from "./types";
 
 const COLORS = [
-  "#ffffff",
+  "#000000",
   "#820000",
   "#ff0000",
   "#007000",
   "#00fb47",
   "#9500b3",
   "#ea7eff",
-  "#787878",
+  "#888888",
   "#0000ff",
   "#03b9d5",
   "#ff7328",
@@ -62,7 +62,7 @@ const getScaleDegree = (pitch: number, tonic: number): string => {
   return SCALE_DEGREES[scaleDegreeIndex];
 };
 
-const BRIGHT_SCALE_DEGREES = ["1", "2", "3", "♯4", "6", "7"];
+const BRIGHT_SCALE_DEGREES = ["3", "♯4", "7"];
 
 // Generate a stable key for a note based on its musical properties
 const generateNoteKey = (note: Note): string => {

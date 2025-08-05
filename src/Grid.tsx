@@ -30,7 +30,7 @@ const OctaveGrid = ({
             top: `${pitchToY(pitch) + NOTE_HEIGHT}px`, // Bottom of the pitch
             width: `${gridWidth}px`,
             height: 0,
-            borderTop: "0.5px solid #999",
+            borderTop: "0.5px solid #666",
             zIndex: 1,
           }}
         />
@@ -47,7 +47,7 @@ const OctaveGrid = ({
             top: `${pitchToY(pitch) + NOTE_HEIGHT}px`, // Bottom of the pitch
             width: `${gridWidth}px`,
             height: 0,
-            borderTop: "0.5px dashed #666",
+            borderTop: "0.5px dashed #999",
             zIndex: 1,
           }}
         />
@@ -81,7 +81,7 @@ const MeasuresGrid = ({
             top: 0,
             width: 0,
             height: `${gridHeight}px`,
-            border: `0.5px solid ${[0, 4].includes(index) ? "#fff" : "#666"}`,
+            border: `0.5px solid ${[0, 4].includes(index) ? "#000" : "#999"}`,
             zIndex: 1,
           }}
         />
@@ -97,7 +97,7 @@ const MeasuresGrid = ({
             top: 0,
             width: 0,
             height: `${gridHeight}px`,
-            border: "0.5px dashed #333",
+            border: "0.5px dashed #ccc",
             zIndex: 2,
           }}
         />
@@ -111,7 +111,7 @@ const MeasuresGrid = ({
             position: "absolute",
             left: `${secondToX(measure) + 7}px`,
             top: "-2px",
-            color: "#ccc",
+            color: "#333",
             fontSize: "12px",
             fontWeight: "bold",
             zIndex: 3,
