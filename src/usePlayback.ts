@@ -4,8 +4,8 @@ import type { Score } from "./types";
 import { loadPianoSamples } from "./samples";
 
 // Global BPM constant for playback tempo
-const PLAYBACK_BPM = 150;
-const REFERENCE_BPM = 240; // BPM that score seconds were originally designed for
+const PLAYBACK_BPM = 72;
+const REFERENCE_BPM = 120; // BPM that score seconds were originally designed for
 
 // Convert score seconds to real playback seconds based on BPM
 const scoreSecondsToRealSeconds = (scoreSeconds: number): number => {
@@ -24,6 +24,7 @@ export const usePlayback = () => {
     Map<string, Set<number>>
   >(new Map());
   const samplerRef = useRef<Tone.Sampler | null>(null);
+  const reverbRef = useRef<Tone.Reverb | null>(null);
   const scheduledEventsRef = useRef<number[]>([]);
   const individualNoteTimeoutsRef = useRef<Map<string, number>>(new Map());
   const individualNoteReleasesRef = useRef<Map<string, string>>(new Map());
@@ -70,7 +71,14 @@ export const usePlayback = () => {
           return;
         }
 
-        // Create sampler with pre-loaded AudioBuffers
+        // Create concert hall reverb effect
+        const reverb = new Tone.Reverb({
+          decay: 3.2, // Concert hall decay time (3.2 seconds)
+          wet: 0.3, // 30% reverb, 70% dry signal
+          preDelay: 0.04, // Small pre-delay for spaciousness
+        });
+
+        // Create sampler with pre-loaded AudioBuffers and chain through reverb
         const sampler = new Tone.Sampler({
           urls: Object.fromEntries(audioBuffers),
           release: 1,
@@ -81,9 +89,10 @@ export const usePlayback = () => {
           onerror: (error) => {
             console.error("❌ Sampler loading error:", error);
           },
-        }).toDestination();
+        }).chain(reverb, Tone.Destination);
 
         samplerRef.current = sampler;
+        reverbRef.current = reverb;
       }
     };
 
@@ -458,6 +467,9 @@ export const usePlayback = () => {
       stop();
       if (samplerRef.current) {
         samplerRef.current.dispose();
+      }
+      if (reverbRef.current) {
+        reverbRef.current.dispose();
       }
     };
   }, [stop]);
