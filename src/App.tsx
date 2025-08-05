@@ -9,6 +9,13 @@ import {
 } from "react";
 import { Play, Square, Pencil, Piano } from "lucide-react";
 import { usePlayback } from "./usePlayback";
+
+// Type for play function with sustain pedal support
+type PlayWithSustain = (
+  score: Score,
+  editorId: string,
+  measures?: number[]
+) => Promise<void>;
 import { Grid } from "./Grid";
 import type { Note, Score } from "./types";
 import { useScoreStorage } from "./scoreStorage";
@@ -424,7 +431,11 @@ const NoteEditor = forwardRef<
               }}
             >
               <button
-                onClick={() => (isPlaying ? stop() : play(score, editorId))}
+                onClick={() =>
+                  isPlaying
+                    ? stop()
+                    : (play as PlayWithSustain)(score, editorId, measures)
+                }
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -688,7 +699,11 @@ const NoteEditor = forwardRef<
               >
                 {/* Play button */}
                 <button
-                  onClick={() => (isPlaying ? stop() : play(score, editorId))}
+                  onClick={() =>
+                    isPlaying
+                      ? stop()
+                      : (play as PlayWithSustain)(score, editorId, measures)
+                  }
                   style={{
                     display: "flex",
                     alignItems: "center",

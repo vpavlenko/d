@@ -4,7 +4,7 @@ import type { Score } from "./types";
 import { loadPianoSamples } from "./samples";
 
 // Global BPM constant for playback tempo
-const PLAYBACK_BPM = 120;
+const PLAYBACK_BPM = 150;
 const REFERENCE_BPM = 240; // BPM that score seconds were originally designed for
 
 // Convert score seconds to real playback seconds based on BPM
@@ -98,7 +98,7 @@ export const usePlayback = () => {
   }, []);
 
   const play = useCallback(
-    async (score: Score, editorId: string) => {
+    async (score: Score, editorId: string, measures?: number[]) => {
       try {
         const sampler = getSampler();
         if (!sampler || !samplerInitialized) {
@@ -147,6 +147,33 @@ export const usePlayback = () => {
             ? Math.min(...score.notes.map((note) => note.start))
             : 0;
 
+        // Helper function to check if sustain pedal is active at a given time
+        const isSustainPedalActive = (scoreTime: number): boolean => {
+          // If no measures provided, don't apply sustain pedaling
+          if (!measures || measures.length === 0) return false;
+
+          const measureNumber = Math.floor(scoreTime);
+          // Only apply sustain if this measure exists in the measures array
+          if (!measures.includes(measureNumber)) return false;
+
+          const measureStart = measureNumber;
+          const pedalPressTime = measureStart + 0.01; // 10ms after measure start in score seconds
+          const nextMeasureStart = measureNumber + 1;
+
+          return scoreTime >= pedalPressTime && scoreTime < nextMeasureStart;
+        };
+
+        // Helper function to find the next pedal release time after a given time
+        const getNextPedalReleaseTime = (scoreTime: number): number => {
+          const currentMeasure = Math.floor(scoreTime);
+          // If no measures provided, fall back to simple calculation
+          if (!measures || measures.length === 0) return currentMeasure + 1;
+
+          // Find the next measure that exists in the measures array
+          const nextMeasure = measures.find((m) => m > currentMeasure);
+          return nextMeasure !== undefined ? nextMeasure : currentMeasure + 1;
+        };
+
         // Schedule all notes using Transport.schedule for precise timing
         score.notes.forEach((note, noteIndex) => {
           // Convert score time to real playback time and subtract minimum start time to skip silence
@@ -175,10 +202,29 @@ export const usePlayback = () => {
             });
           }, `${realStartTime}`);
 
-          // Schedule note end (both audio release and UI update)
+          // Determine actual release time based on sustain pedal
+          let actualReleaseTime = realEndTime;
+
+          // Check if sustain pedal is active when this note should end
+          if (isSustainPedalActive(note.end)) {
+            // Sustain the note until the next pedal release (next measure)
+            const nextPedalReleaseTime = getNextPedalReleaseTime(note.end);
+            actualReleaseTime = scoreSecondsToRealSeconds(
+              nextPedalReleaseTime - minStartTime
+            );
+            const noteName = Tone.Frequency(note.pitch, "midi").toNote();
+            console.log(
+              `🦶 Sustaining note ${noteName} from ${
+                note.end
+              }s until measure ${Math.floor(
+                nextPedalReleaseTime
+              )} (${nextPedalReleaseTime}s)`
+            );
+          }
+
           // CRITICAL: Schedule releases slightly before their exact time to ensure
           // they execute before any attacks at the same time (prevents note cutoff bug)
-          const releaseTime = Math.max(0, realEndTime - 0.01); // 10ms earlier, but never negative
+          const releaseTime = Math.max(0, actualReleaseTime - 0.01); // 10ms earlier, but never negative
           const endEventId = Tone.Transport.schedule((time) => {
             // Convert MIDI number to note name
             const noteName = Tone.Frequency(note.pitch, "midi").toNote();
