@@ -1,4 +1,5 @@
 import type { VersionedScores } from "./types";
+import { riverNarrative } from "./riverNarrative";
 
 export const defaultScores: VersionedScores = {
   scores: [
@@ -3142,6 +3143,7 @@ export const defaultScores: VersionedScores = {
       description:
         "Yiruma sustains notes with a pedal till the end of every measure, so the actual sound is more like this. As the drawn out sustained notes are harder to read, we'll use the shorter ones",
     },
+    ...riverNarrative,
   ],
-  version: 4504,
+  version: 4505,
 };

@@ -13,6 +13,11 @@ export type Score = {
   notes: Note[];
   tonic: PitchClass;
   description: string;
+  // New lessons use one score unit per bar. Older examples retain their timing.
+  beatsPerMeasure?: number;
+  bpm?: number;
+  pedal?: boolean;
+  allowChromaticNotes?: boolean;
 };
 
 export type VersionedScores = {

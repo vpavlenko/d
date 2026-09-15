@@ -9,6 +9,8 @@ import {
 } from "react";
 import { Play, Square, Pencil, Piano } from "lucide-react";
 import { usePlayback } from "./usePlayback";
+import { lessonFromSearch, lessons } from "./lessons";
+import type { Lesson } from "./lessons";
 
 // Type for play function with sustain pedal support
 type PlayWithSustain = (
@@ -66,7 +68,8 @@ const NoteEditor = forwardRef<
       pitch: number,
       duration: number,
       noteIndex?: number,
-      editorId?: string
+      editorId?: string,
+      score?: Score
     ) => void;
     onAddNewScore: () => void;
     showEditingUI: boolean;
@@ -90,6 +93,9 @@ const NoteEditor = forwardRef<
   ) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [score, setScore] = useState(initialScore);
+    const eighthNoteDuration = score.beatsPerMeasure
+      ? 1 / (score.beatsPerMeasure * 2)
+      : EIGHTH_NOTE_DURATION;
     const [hoverNote, setHoverNote] = useState<Note | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragNote, setDragNote] = useState<Note | null>(null);
@@ -102,7 +108,7 @@ const NoteEditor = forwardRef<
       "horizontal"
     );
     const [pxPerSecond, setPxPerSecond] = useState(MIN_PX_PER_SECOND);
-    const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+    const [viewportWidth, setViewportWidth] = useState(document.documentElement.clientWidth);
 
     // Sync with parent score when it changes from outside
     useEffect(() => {
@@ -122,9 +128,9 @@ const NoteEditor = forwardRef<
           // Use vertical layout
           setLayoutType("vertical");
           // Calculate PX_PER_SECOND to fit 5 seconds into 98% of viewport width
-          const availableWidth = viewportWidth * 0.98;
+          const availableWidth = Math.max(1, viewportWidth - 32);
           const dynamicPxPerSecond = availableWidth / 5;
-          setPxPerSecond(Math.max(MIN_PX_PER_SECOND, dynamicPxPerSecond));
+          setPxPerSecond(dynamicPxPerSecond);
         } else {
           // Use horizontal layout
           setLayoutType("horizontal");
@@ -146,7 +152,7 @@ const NoteEditor = forwardRef<
     // Handle window resize
     useEffect(() => {
       const handleResize = () => {
-        setViewportWidth(window.innerWidth);
+        setViewportWidth(document.documentElement.clientWidth);
       };
 
       window.addEventListener("resize", handleResize);
@@ -193,7 +199,7 @@ const NoteEditor = forwardRef<
         tonic: number
       ) => {
         for (let pitch = minPitch; pitch <= maxPitch; pitch++) {
-          if (![0, 2, 4, 5, 7, 9, 11].includes((pitch - tonic + 12) % 12)) {
+          if (!score.allowChromaticNotes && ![0, 2, 4, 5, 7, 9, 11].includes((pitch - tonic + 12) % 12)) {
             continue;
           }
           const pitchY = pitchToY(pitch);
@@ -205,7 +211,7 @@ const NoteEditor = forwardRef<
 
         return maxPitch;
       },
-      []
+      [score.allowChromaticNotes]
     );
 
     // Fine-grained quantization for 16th notes
@@ -309,9 +315,10 @@ const NoteEditor = forwardRef<
         { length: lastMeasure + 1 },
         (_, index) => index
       );
+      const beatsPerMeasure = score.beatsPerMeasure ?? 4;
       const allBeats = Array.from(
-        { length: lastMeasure * 4 },
-        (_, index) => index / 4
+        { length: lastMeasure * beatsPerMeasure },
+        (_, index) => index / beatsPerMeasure
       );
 
       // Strip measures from beats via Set operations
@@ -323,11 +330,11 @@ const NoteEditor = forwardRef<
       // Calculate dynamic dimensions - use hardcoded values when editing, calculated when not
       const minPitch =
         isEditMode || score.notes.length === 0
-          ? 36 + score.tonic
+          ? Math.min(36 + score.tonic, ...score.notes.map((note) => note.pitch))
           : Math.min(...score.notes.map((note) => note.pitch));
       const maxPitch =
         isEditMode || score.notes.length === 0
-          ? 84 + score.tonic
+          ? Math.max(84 + score.tonic, ...score.notes.map((note) => note.pitch))
           : Math.max(...score.notes.map((note) => note.pitch));
       const gridHeight =
         (maxPitch - minPitch) * PITCH_DISTANCE + NOTE_HEIGHT + HEADER_HEIGHT;
@@ -361,7 +368,7 @@ const NoteEditor = forwardRef<
         const y = e.clientY - rect.top;
 
         const start = quantizeXFine(x, measures, beats);
-        const end = start + EIGHTH_NOTE_DURATION;
+        const end = start + eighthNoteDuration;
         const pitch = quantizeY(y, pitchToY, minPitch, maxPitch, score.tonic);
 
         return { start, end, pitch, x, y };
@@ -375,6 +382,7 @@ const NoteEditor = forwardRef<
         minPitch,
         maxPitch,
         score.tonic,
+        eighthNoteDuration,
       ]
     );
 
@@ -521,7 +529,7 @@ const NoteEditor = forwardRef<
                         // Ensure end is not before start
                         const finalEnd = Math.max(
                           newEnd,
-                          dragNote.start + 0.0625
+                          dragNote.start + eighthNoteDuration / 2
                         ); // Minimum 16th note length
 
                         const updatedDragNote: Note = {
@@ -652,7 +660,7 @@ const NoteEditor = forwardRef<
         ) : (
           /* Vertical layout: Description with buttons to right, Grid below */
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+            style={{ display: "flex", flexDirection: "column", gap: "10px", width: `${Math.max(1, viewportWidth - 32)}px` }}
           >
             {/* Top row: Description + Buttons */}
             <div
@@ -674,7 +682,6 @@ const NoteEditor = forwardRef<
                       padding: "8px",
                       fontSize: "14px",
                       resize: "vertical",
-                      margin: "100px 0 200px 0",
                     }}
                     placeholder="Enter description..."
                   />
@@ -827,7 +834,7 @@ const NoteEditor = forwardRef<
                         // Ensure end is not before start
                         const finalEnd = Math.max(
                           newEnd,
-                          dragNote.start + 0.0625
+                          dragNote.start + eighthNoteDuration / 2
                         ); // Minimum 16th note length
 
                         const updatedDragNote: Note = {
@@ -949,10 +956,10 @@ const NoteEditor = forwardRef<
 
 NoteEditor.displayName = "NoteEditor";
 
-function App() {
+function LessonView({ lesson, playback }: { lesson: Lesson; playback: ReturnType<typeof usePlayback> }) {
   // Score storage management
   const { versionedScores, handleScoreChange, addNewScore, ScoreStorageUI } =
-    useScoreStorage();
+    useScoreStorage(lesson.scores, lesson.storageKey);
 
   // Global playback system - singleton for all NoteEditors
   const {
@@ -965,7 +972,7 @@ function App() {
     playNote,
     audioContextAllowed,
     enableAudioContext,
-  } = usePlayback();
+  } = playback;
 
   // Check if we should show editing UI
   const showEditingUI = shouldShowEditingUI();
@@ -1078,6 +1085,64 @@ function App() {
       {/* Score storage UI (copy button and version display) - only show in editing mode */}
       {showEditingUI && <ScoreStorageUI />}
     </div>
+  );
+}
+
+function App() {
+  const [lesson, setLesson] = useState(() => lessonFromSearch(window.location.search));
+  const playback = usePlayback();
+  const { stop } = playback;
+
+  useEffect(() => {
+    const handleHistory = () => {
+      stop();
+      setLesson(lessonFromSearch(window.location.search));
+    };
+    window.addEventListener("popstate", handleHistory);
+    return () => window.removeEventListener("popstate", handleHistory);
+  }, [stop]);
+
+  useEffect(() => {
+    document.title = `${lesson.title} · Compose in layers`;
+  }, [lesson]);
+
+  const selectLesson = (next: Lesson) => {
+    if (next.id === lesson.id) return;
+    stop();
+    const url = new URL(window.location.href);
+    url.searchParams.set("piece", next.id);
+    window.history.pushState(null, "", url);
+    setLesson(next);
+    window.scrollTo(0, 0);
+  };
+
+  return (
+    <>
+      <header className="lesson-header">
+        <p className="lesson-eyebrow">Compose in layers</p>
+        <nav className="lesson-nav" aria-label="Composition lessons">
+          {lessons.map((item, index) => (
+            <button
+              key={item.id}
+              type="button"
+              aria-current={lesson.id === item.id ? "page" : undefined}
+              onClick={() => selectLesson(item)}
+            >
+              <span className="lesson-number">0{index + 1}</span> {item.title}
+            </button>
+          ))}
+        </nav>
+        <h1>{lesson.title}</h1>
+        <p className="lesson-subtitle">{lesson.subtitle}</p>
+        <p className="lesson-instructions">
+          Listen, take the layers apart, then put them back together.
+          {" "}<a href={lesson.source} target="_blank" rel="noreferrer">Explore the full piece on Rawl ↗</a>
+        </p>
+      </header>
+      <main>
+        <LessonView key={lesson.id} lesson={lesson} playback={playback} />
+      </main>
+    </>
   );
 }
 

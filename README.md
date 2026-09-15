@@ -1,69 +1,37 @@
-# React + TypeScript + Vite
+# Compose in layers
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interactive composition lessons built from colored piano-roll examples. Listen
+to a passage, take its bass, chords, and melody apart, then rebuild it one idea
+at a time.
 
-Currently, two official plugins are available:
+## Lessons
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **River Flows in You — Yiruma:** broken chords, melodic hills, and flowing fills.
+- **Gymnopédie No. 1 — Erik Satie:** bass–chord separation, seventh chords, and space.
+- **Vizisi:** jumping bass, octave melodies, and travelling chord shapes.
 
-## Expanding the ESLint configuration
+Use the lesson navigation to switch pieces. The selected piece is recorded in
+`?piece=...`, so each lesson can be linked directly. Each piece keeps its own
+local edits; the original River Flows in You storage key is preserved.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Implementation
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+React, TypeScript, and Vite render the lesson examples. Tone.js plays bundled
+piano samples. Notes are colored by pitch relative to the example's tonic;
+the rest of the interface is grayscale.
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- `src/lessons.ts` registers the three lessons and their storage keys.
+- `src/scores.ts` and `src/riverNarrative.ts` contain the original lesson.
+- `src/gymnopedieNarrative.ts` and `src/vizisiNarrative.ts` build the new lessons.
+- `src/lessonScores.ts` selects MIDI excerpts and their isolated layers.
+- `src/data/` contains extracted note data; playback needs no Rawl connection.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+See [source notes and lesson behavior](docs/composition-lessons.md) and the
+[River Flows in You analysis](docs/river-flows-in-you.md).
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Checks
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```sh
+npm run build
+npm run lint
 ```

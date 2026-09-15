@@ -94,7 +94,8 @@ export const RenderedNotes = ({
     pitch: number,
     duration: number,
     noteIndex?: number,
-    editorId?: string
+    editorId?: string,
+    score?: Score
   ) => void;
   onNoteDelete: (index: number) => void;
   hoveredNoteIndex?: number | null;
@@ -202,7 +203,7 @@ export const RenderedNotes = ({
                 // Always play note on hover (both edit and non-edit mode)
                 // Pass noteIndex and editorId for editor-specific note animation tracking
                 // Use actual note duration (end - start) instead of fixed 0.3 seconds
-                playNote(note.pitch, note.end - note.start, index, editorId);
+                playNote(note.pitch, note.end - note.start, index, editorId, score);
                 // Only track hover state for edit mode (for delete scaling)
                 if (isEditMode) {
                   onNoteHover(index);

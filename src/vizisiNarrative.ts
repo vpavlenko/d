@@ -1,0 +1,107 @@
+import data from "./data/vizisi.json";
+import { layer, makeExcerpt } from "./lessonScores";
+import type { Score } from "./types";
+
+const excerpt = (
+  first: number,
+  last: number,
+  description: string,
+  hands: ("right" | "left")[] = ["right", "left"]
+) => makeExcerpt(data, first, last, 5, description, hands);
+
+const accompaniment = excerpt(5, 8, "", ["left"]);
+const octaves = excerpt(5, 8, "", ["right"]);
+const tune = octaves.notes.filter((note) =>
+  !octaves.notes.some((other) => other.start === note.start && other.pitch > note.pitch)
+);
+const bass = accompaniment.notes.filter((note) => note.pitch < 48);
+const chords = accompaniment.notes.filter((note) => note.pitch >= 48);
+const dFlat = excerpt(9, 9, "");
+const cMajor = excerpt(11, 11, "");
+
+export const vizisiNarrative: Score[] = [
+  excerpt(5, 8,
+    'How is "Vizisi" built? A big octave melody rides over a jumping left hand. Let’s pull it apart, build the first theme, then see how the piece keeps transforming those ingredients. Our colors stay anchored to F = 1.'),
+  layer(accompaniment,
+    "Start downstairs. F, then C, then F, then C. Root and fifth give us a springy back-and-forth. The little E at the end of every second bar steps us back up to F.", bass),
+  layer(accompaniment,
+    "Now listen to the other half of the left hand: C–F–A chords between the low notes. One hand has two jobs. Low notes mark the ground; higher chords answer them.", chords),
+  layer(accompaniment,
+    "Put those layers together: bass, chord, bass, chord. The pianist jumps between registers. That's the engine of this passage, and it can keep running under very different melodies.", accompaniment.notes),
+  layer(octaves,
+    "Strip the melody down to one note at a time. F–C, D–A, then C–G–A. Just five pitch names: F, G, A, C, D. These make the F-major pentatonic scale, a five-note collection.", tune),
+  layer(octaves,
+    "Here are those five pitches in order, with F again at the top. This is a teaching sketch. Try making your own small tune with them before adding any of the piece's other colors.",
+    [65, 67, 69, 72, 74, 77].map((pitch, index) => ({ pitch, start: 1 + index / 4, end: 1 + (index + 1) / 4 }))),
+  layer(octaves,
+    "Double our tune an octave below. Both notes have the same name and color. We haven't added another melodic idea, but the line becomes much broader.", octaves.notes),
+  excerpt(5, 8,
+    "Now put the octave tune over the jumping bass and chords. Three layers, only two hands. The melody leaves gaps and changes rhythm while the accompaniment keeps the pulse."),
+  excerpt(1, 3,
+    "How do we introduce that entrance? Three short C-major hits. C is the 5 chord of F: it points toward the F theme. The source then leaves a silent bar before the melody arrives."),
+  excerpt(9, 10,
+    "After the first theme, change the scenery. D♭ major sits outside our F-major scale. The melody becomes a quick up-and-down run while the left hand keeps the same bass–chord pattern. New pitches, familiar motion."),
+  layer(dFlat,
+    "Listen to a one-bar comparison: the D♭ run, then its C-major version. Move the melody's whole shape down one semitone. The rhythm survives intact, so the change sounds connected even though many colors change.",
+    [...dFlat.notes, ...cMajor.notes.map((note) => ({ ...note, start: note.start + 1, end: note.end + 1 }))]),
+  excerpt(13, 16,
+    "Return to the octave theme. The detour made a contrast; the unchanged tune gives us something to recognize. We can now leave it again in another direction."),
+  excerpt(17, 20,
+    "This time, climb using D, E, F♯, G♯, A♯, C: a whole-tone collection, where every step is equally wide. The melody zigzags upward over D7. Changing the scale creates a different kind of motion without changing the left-hand engine."),
+  excerpt(21, 24,
+    "Stop the regular bass–chord alternation for a moment. Strike fuller chords, leave gaps, and let D dip to C♯ before coming back. A tiny lower neighbor makes the repeated melody note feel active."),
+  excerpt(25, 28,
+    "Take one quick melodic shape and move it down a semitone each bar. The left hand descends too. Listen for the repeated rhythm through all those changing pitches. A sequence lets one idea travel."),
+  excerpt(29, 32,
+    "That descending passage lands us back at the F theme. Its octave outline is unchanged. The contrast comes from what happened between its appearances."),
+  excerpt(33, 36,
+    "The D♭-to-C detour returns, but the melody now starts high and curls around instead of climbing from below. Keep the harmonic route; redraw the melody over it."),
+  excerpt(41, 44,
+    "After another F-theme statement, try D–E♭–D in octaves. Now the neighbor is above the main note. The same doubling and left-hand pattern make this new phrase belong to the same piece."),
+  excerpt(45, 48,
+    "Bring back the clipped chord answers and the D–C♯–D turn. Reusing a contrasting passage helps it become a second landmark, rather than a one-off surprise."),
+  excerpt(49, 51,
+    "Move that answering idea down a whole tone: C–B–C replaces D–C♯–D. The accompaniment moves too. We can prepare a new section by relocating an idea the listener already knows."),
+  excerpt(52, 55,
+    "Now shorten the bars to three beats. The left hand changes to bass, chord, chord. Count ONE, two, three. The melody uses longer notes, making the new pulse easy to hear."),
+  excerpt(56, 58,
+    "Pass the chord attacks between the hands. The right hand waits, then joins with small chord shapes of its own. Even with fewer melody notes, the changing placement of the chords keeps the passage moving."),
+  excerpt(60, 63,
+    "Four beats return. The accompaniment stretches into a new pattern: bass on one, chord on three, bass on four. Listen to the roots moving C–F–E–D. Rhythm can change the feel as much as harmony."),
+  excerpt(64, 67,
+    "Continue the bass route through C–F–E–D again, with the melody resting. This gives the new accompaniment time to become familiar before another tune arrives."),
+  excerpt(68, 71,
+    "Here's the new tune: E–G–E–C, with repeated Gs and B♭s in its answer. Underneath, C major alternates with B♭ major. Two major chords a whole tone apart make a different world from the opening F theme."),
+  excerpt(72, 75,
+    "Answer with a climb C–E–G and a held F. Keep the two-chord motion. Longer notes at the end of a phrase let the listener hear the accompaniment underneath."),
+  excerpt(84, 87,
+    "After repeating the C-and-B♭ passage, move the whole idea down to A and G. E–G–E–C becomes C♯–E–C♯–A. Same contour and rhythm, new pitch level. That's transposition."),
+  excerpt(92, 95,
+    "Move down another three semitones, to F♯ and E. Repeating the same kind of shift makes a larger pattern out of several phrases. Listen for the melody's shape through the new colors."),
+  excerpt(100, 103,
+    "The next station is E♭, another three semitones lower. But now the melody becomes sparse. A repeated harmonic plan doesn't force us to repeat the same density of notes."),
+  excerpt(110, 113,
+    "Back over C, fill the upper register with half-step neighbors: G–F♯–G, then A–A♭–A. The chord can stay put while the melody takes little chromatic steps around it."),
+  excerpt(114, 117,
+    "Return to the E–G–E–C tune and its B♭ answer. After the travelling keys and quick chromatic line, this familiar shape can act like a homecoming within the middle section."),
+  excerpt(130, 132,
+    "Near the end of that section, the three short C-major hits return. We heard them right at the start. Reusing an introduction can announce the return of a whole earlier section."),
+  excerpt(134, 137,
+    "And there is the opening octave theme. Its bass–chord engine, five-note melody, and wide register all return together. We recognize the arrangement of the layers as well as the notes."),
+  excerpt(146, 149,
+    "The return also brings back the whole-tone climb. The D♭-and-C detour has already passed by again. These contrasting episodes make a route we can follow for a second time."),
+  excerpt(154, 157,
+    "The half-step descent returns too. Keep moving the short pattern down, then let it lead into F again. The piece reuses its transitions as carefully as its main tune."),
+  excerpt(174, 175,
+    "After more returns of the theme and its detours, change the closing route. A plain D–E–F–G–A climb now sits over D minor. Those ordinary scale steps contrast with the whole-tone climb just before them."),
+  excerpt(176, 179,
+    "Shift to F♯ major, then down to F major. The left hand still uses major-chord shapes with the same rhythm. Moving a familiar chord shape can create a surprise without rebuilding the texture."),
+  excerpt(180, 181,
+    "Then slide down again to E major. Leave the melody hanging while the accompaniment repeats. The sequence of changing chord colors is doing the work."),
+  excerpt(185, 188,
+    "After the familiar clipped answers, keep a high F while the lower notes descend: A♭, G, F♯, F. Some chord notes change by half steps beneath that held pitch. We can make tension move while one voice stays still."),
+  excerpt(189, 190,
+    "Land on F, repeat it, then step sideways to an E♭ chord. Instead of stopping at the first arrival, the piece leaves one more gap and one last approach."),
+  excerpt(193, 193,
+    "Finally, E♭–E–F in the bass and the right hand. The fifths above those roots move with them. Three rising steps close the piece on F. We built it from a jumping accompaniment, a small tune, octave doubling, and shapes that travel. Try keeping one of those layers and inventing the others."),
+];

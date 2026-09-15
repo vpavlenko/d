@@ -8,3 +8,60 @@ body {
   background-color: black;
   font-family: "Quicksand", sans-serif;
 }
+
+.lesson-header {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 36px 24px 20px;
+  color: #eee;
+}
+
+.lesson-eyebrow {
+  color: #999;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.lesson-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 28px;
+}
+
+.lesson-nav button {
+  background: transparent;
+  color: #999;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 12px 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lesson-nav button:hover,
+.lesson-nav button[aria-current="page"] {
+  color: #fff;
+  border-bottom-color: #eee;
+}
+
+.lesson-nav button:focus-visible,
+.lesson-instructions a:focus-visible {
+  outline: 2px solid #ccc;
+  outline-offset: 4px;
+}
+
+.lesson-number { color: #777; margin-right: 6px; }
+.lesson-header h1 { font-size: clamp(26px, 4vw, 40px); font-weight: 500; }
+.lesson-subtitle { color: #bbb; margin-top: 10px; line-height: 1.5; }
+.lesson-instructions { color: #888; font-size: 14px; margin-top: 14px; line-height: 1.7; }
+.lesson-instructions a { color: #bbb; text-underline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .lesson-header { padding: 24px 16px 12px; }
+  .lesson-nav { gap: 4px 16px; }
+  .lesson-nav button { font-size: 14px; }
+}

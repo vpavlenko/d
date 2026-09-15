@@ -2,15 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import * as Tone from "tone";
 import type { Score } from "./types";
 import { loadPianoSamples } from "./samples";
-
-// Global BPM constant for playback tempo
-const PLAYBACK_BPM = 72;
-const REFERENCE_BPM = 120; // BPM that score seconds were originally designed for
-
-// Convert score seconds to real playback seconds based on BPM
-const scoreSecondsToRealSeconds = (scoreSeconds: number): number => {
-  return scoreSeconds * (REFERENCE_BPM / PLAYBACK_BPM);
-};
+import { scoreTimeToSeconds } from "./scoreTime";
 
 // Samples are bundled - decoding happens in background without loading screen
 
@@ -158,6 +150,7 @@ export const usePlayback = () => {
 
         // Helper function to check if sustain pedal is active at a given time
         const isSustainPedalActive = (scoreTime: number): boolean => {
+          if (score.pedal === false) return false;
           // If no measures provided, don't apply sustain pedaling
           if (!measures || measures.length === 0) return false;
 
@@ -186,11 +179,11 @@ export const usePlayback = () => {
         // Schedule all notes using Transport.schedule for precise timing
         score.notes.forEach((note, noteIndex) => {
           // Convert score time to real playback time and subtract minimum start time to skip silence
-          const realStartTime = scoreSecondsToRealSeconds(
-            note.start - minStartTime
+          const realStartTime = scoreTimeToSeconds(
+            note.start - minStartTime, score
           );
-          const realEndTime = scoreSecondsToRealSeconds(
-            note.end - minStartTime
+          const realEndTime = scoreTimeToSeconds(
+            note.end - minStartTime, score
           );
 
           // Schedule note start
@@ -218,8 +211,8 @@ export const usePlayback = () => {
           if (isSustainPedalActive(note.end)) {
             // Sustain the note until the next pedal release (next measure)
             const nextPedalReleaseTime = getNextPedalReleaseTime(note.end);
-            actualReleaseTime = scoreSecondsToRealSeconds(
-              nextPedalReleaseTime - minStartTime
+            actualReleaseTime = scoreTimeToSeconds(
+              nextPedalReleaseTime - minStartTime, score
             );
             const noteName = Tone.Frequency(note.pitch, "midi").toNote();
             console.log(
@@ -260,8 +253,8 @@ export const usePlayback = () => {
         const maxScoreEndTime = Math.max(
           ...score.notes.map((note) => note.end)
         );
-        const maxRealEndTime = scoreSecondsToRealSeconds(
-          maxScoreEndTime - minStartTime
+        const maxRealEndTime = scoreTimeToSeconds(
+          maxScoreEndTime - minStartTime, score
         );
         const stopEventId = Tone.Transport.schedule(() => {
           setIsPlaying(false);
@@ -373,7 +366,8 @@ export const usePlayback = () => {
       pitch: number,
       duration: number,
       noteIndex?: number,
-      editorId?: string
+      editorId?: string,
+      score?: Score
     ) => {
       const sampler = getSampler();
       // Only play if sampler is initialized
@@ -429,7 +423,7 @@ export const usePlayback = () => {
 
         // CRITICAL: Use BPM conversion like the main play method
         // Convert score duration to real playback duration
-        const realDuration = scoreSecondsToRealSeconds(duration);
+        const realDuration = scoreTimeToSeconds(duration, score);
 
         // Schedule release after the BPM-converted duration
         const timeout = setTimeout(() => {

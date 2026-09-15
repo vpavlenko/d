@@ -6,9 +6,12 @@ import { defaultScores } from "./scores";
 // localStorage utilities
 export const SCORES_STORAGE_KEY = "music-scores";
 
-export const loadScoresFromStorage = (): VersionedScores => {
+export const loadScoresFromStorage = (
+  initialScores: VersionedScores = defaultScores,
+  storageKey = SCORES_STORAGE_KEY
+): VersionedScores => {
   try {
-    const stored = localStorage.getItem(SCORES_STORAGE_KEY);
+    const stored = localStorage.getItem(storageKey);
     if (stored) {
       const parsedData = JSON.parse(stored);
       // Handle migration from old format (Score[]) to new format (VersionedScores)
@@ -17,16 +20,19 @@ export const loadScoresFromStorage = (): VersionedScores => {
       }
       return parsedData;
     }
-    return defaultScores;
+    return initialScores;
   } catch (error) {
     console.error("Failed to load scores from localStorage:", error);
-    return defaultScores;
+    return initialScores;
   }
 };
 
-export const saveScoresToStorage = (versionedScores: VersionedScores): void => {
+export const saveScoresToStorage = (
+  versionedScores: VersionedScores,
+  storageKey = SCORES_STORAGE_KEY
+): void => {
   try {
-    localStorage.setItem(SCORES_STORAGE_KEY, JSON.stringify(versionedScores));
+    localStorage.setItem(storageKey, JSON.stringify(versionedScores));
   } catch (error) {
     console.error("Failed to save scores to localStorage:", error);
   }
@@ -39,10 +45,13 @@ interface ScoreStorageHook {
   ScoreStorageUI: React.FC;
 }
 
-export const useScoreStorage = (): ScoreStorageHook => {
+export const useScoreStorage = (
+  initialScores: VersionedScores = defaultScores,
+  storageKey = SCORES_STORAGE_KEY
+): ScoreStorageHook => {
   const [versionedScores, setVersionedScores] = useState<VersionedScores>(
     () => {
-      const loaded = loadScoresFromStorage();
+      const loaded = loadScoresFromStorage(initialScores, storageKey);
       return loaded;
     }
   );
@@ -54,16 +63,16 @@ export const useScoreStorage = (): ScoreStorageHook => {
 
   // Version comparison and origin tracking on initial load
   useEffect(() => {
-    const storedData = loadScoresFromStorage();
-    if (defaultScores.version > storedData.version) {
-      setVersionedScores(defaultScores);
+    const storedData = loadScoresFromStorage(initialScores, storageKey);
+    if (initialScores.version > storedData.version) {
+      setVersionedScores(initialScores);
       setScoresOrigin("source");
       setHasChanges(false); // No changes yet when loading from source
     } else {
       setScoresOrigin("localStorage");
       setHasChanges(false); // No changes yet
     }
-  }, []);
+  }, [initialScores, storageKey]);
 
   const handleScoreChange = useCallback(
     (index: number) => (updatedScore: Score) => {
@@ -81,7 +90,7 @@ export const useScoreStorage = (): ScoreStorageHook => {
 
         // Save to localStorage if needed
         if (shouldSave) {
-          saveScoresToStorage(updated);
+          saveScoresToStorage(updated, storageKey);
         }
 
         return updated;
@@ -93,12 +102,13 @@ export const useScoreStorage = (): ScoreStorageHook => {
         setScoresOrigin("localStorage");
       }
     },
-    [scoresOrigin, hasChanges]
+    [scoresOrigin, hasChanges, storageKey]
   );
 
   const addNewScore = useCallback((sourceScore: Score, insertIndex: number) => {
     // Create a new score by copying the source score
     const newScore: Score = {
+      ...sourceScore,
       notes: [...sourceScore.notes], // Deep copy the notes array
       tonic: sourceScore.tonic,
       description: "A new copy",
@@ -115,14 +125,14 @@ export const useScoreStorage = (): ScoreStorageHook => {
       };
 
       // Save to localStorage
-      saveScoresToStorage(updated);
+      saveScoresToStorage(updated, storageKey);
       return updated;
     });
 
     // Update state flags
     setHasChanges(true);
     setScoresOrigin("localStorage");
-  }, []);
+  }, [storageKey]);
 
   const copyScoresAsJson = useCallback(async () => {
     try {
