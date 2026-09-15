@@ -135,10 +135,10 @@ export const RenderedNotes = ({
         const color = COLORS[colorIndex];
         const scaleDegree = getScaleDegree(note.pitch, score.tonic);
 
-        // Show letter name for the first tonic note, scale degree for all others
+        // Show the scale degree and letter name for the first tonic note.
         const displayText =
           scaleDegree === "1" && index === firstTonicIndex
-            ? getPitchClassName(score.tonic)
+            ? `1 = ${getPitchClassName(score.tonic)}`
             : scaleDegree;
 
         const textColor = BRIGHT_SCALE_DEGREES.includes(scaleDegree)
